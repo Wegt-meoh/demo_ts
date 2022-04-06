@@ -1,0 +1,102 @@
+.App {
+    --primary-color: #cfcbd3;
+    --app-height: 600px;
+    --blur-color-light: #dbd7df;
+    --blur-color-dark: #b2aeb6;
+}
+
+.App {
+    user-select: none;
+    height: var(--app-height);
+    box-sizing: border-box;
+    background-color: var(--primary-color);
+    position: relative;
+}
+
+.App-login-board {
+    --content-width: 240px;
+    --content-height: 40px;
+    --title-height: 20%;
+    --x-index: 3px;
+    --y-index: calc(-1*var(--x-index));
+    --blur: 6px;
+    --spread: 4px;
+    width: 300px;
+    height: 400px;
+    box-sizing: border-box;
+    border-radius: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background-color: var(--primary-color);
+    box-shadow: var(--y-index) var(--y-index) var(--blur) var(--spread) var(--blur-color-light), var(--x-index) var(--x-index) var(--blur) var(--spread) var(--blur-color-dark);
+    transform: translate(-50%, -50%);
+}
+
+.App-login-title {
+    font-size: large;
+    text-align: center;
+    box-sizing: border-box;
+    height: var(--title-height);
+}
+
+.App-login-title>div {
+    width: calc(var(--content-width)*60%);
+    height: var(--content-height);
+    box-sizing: border-box;
+}
+
+.App-login-content {
+    box-sizing: border-box;
+    height: calc(100% - var(--title-height));
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.App-login-input>span {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.App-login-input>input {
+    --x-index: 2px;
+    --y-index: calc(-1*var(--x-index));
+    --blur: 4px;
+    --spread: 2px;
+    box-sizing: border-box;
+    display: block;
+    width: var(--content-width);
+    height: var(--content-height);
+    border: none;
+    background-color: var(--primary-color);
+    border-radius: 20px;
+    padding: 0 20px 0 20px;
+    font-size: 16px;
+    border: 1px dashed var(--blur-color-dark);
+    outline: none;
+    margin-bottom: 20px;
+}
+
+.App-login-input>input:focus {
+    border: none;
+    box-shadow: inset var(--y-index) var(--y-index) var(--blur) var(--spread) var(--blur-color-light), inset var(--x-index) var(--x-index) var(--blur) var(--spread) var(--blur-color-dark);
+}
+
+.App-login-button {
+    --x-index: 2px;
+    --y-index: calc(-1*var(--x-index));
+    --blur: 4px;
+    --spread: 2px;
+    background-color: var(--primary-color);
+    width: var(--content-width);
+    height: var(--content-height);
+    border-radius: 20px;
+    border: none;
+    box-shadow: var(--y-index) var(--y-index) var(--blur) var(--spread) var(--blur-color-light), var(--x-index) var(--x-index) var(--blur) var(--spread) var(--blur-color-dark);
+}
+
+.App-login-button:active {
+    border: 1px solid var(--blur-color-dark);
+    box-shadow: none;
+}
