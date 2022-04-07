@@ -36,7 +36,7 @@ export function getInvoices(): invoice[] {
     return dataList
 }
 
-export function getInvoiceById(id: string): invoice {
+export function getInvoiceById(id: string): invoice |undefined{
     return dataList.find((i: invoice) => {
         return i.id === id
     })
@@ -53,7 +53,7 @@ export function getInvoicesByBrand(brand: string | null | undefined) {
 }
 
 export let brands: string[] = function () {
-    let res = []
+    let res:string[] = []
     dataList.forEach((i) => {
         res.push(i.brand)
     })

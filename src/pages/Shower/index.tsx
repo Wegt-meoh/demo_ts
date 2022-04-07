@@ -2,7 +2,7 @@ import React from 'react'
 import './index.css'
 import Invoice from '../../components/Invoice'
 import { type invoice, brands, getInvoicesByBrand } from '../../datas/invoices'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams,useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import BrandLink from '../../components/BrandLink'
 
