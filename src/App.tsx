@@ -2,16 +2,13 @@ import React from 'react';
 import './App.css';
 import { Routes, Route, Link } from 'react-router-dom';
 
-import Login from './pages/Login';
-import Shower from './pages/Shower';
+import Index from './pages/Index';
 
 function App() {
   return (
     <div className="App">
       <Routes>
-        <Route index element={<Link to='/login'>login</Link>} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/shower' element={<Shower />} />
+        <Route index element={<Index/>} />
         <Route path='*' element={<NoMatchPage />}/>
       </Routes>
     </div>
@@ -116,6 +113,7 @@ function NoMatchPage(){
   return  (
     <div>
       <h2>No such Page, please check your url.</h2>
+      <Link to='/'>back to home page</Link>
     </div>
   )
 }
