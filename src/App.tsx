@@ -14,8 +14,6 @@ function App() {
         <Route path='/shower' element={<Shower />} />
         <Route path='*' element={<NoMatchPage />}/>
       </Routes>
-
-
     </div>
   );
 }
