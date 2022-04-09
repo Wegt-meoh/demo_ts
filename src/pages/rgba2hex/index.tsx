@@ -2,25 +2,19 @@ import React, { useState } from 'react'
 import { InputNumber, Button, Space } from 'antd';
 import './index.css'
 
-export default function RgbToHex() {
+export default function RgbaToHex() {
 
-    const [state, setState] = useState({ R: 255, G: 255, B: 255, A: 100, res: '#FFFFFF' })
+    const [state, setState] = useState({ R: 255, G: 255, B: 255,A:100, res: '#FFFFFFFF' })
 
-
-
-    function changeValue(x: 'R' | 'G' | 'B' | 'A', value: number | null) {
+    function changeValue(x: 'R' | 'G' | 'B' |'A', value: number | null) {
         let newState = { ...state }
         newState[x] = value == null ? 0 : value
-
-        let a = newState.A * 0.01,
-            r = Math.floor(a * newState.R + (1 - a) * 255),
-            g = Math.floor(a * newState.G + (1 - a) * 255),
-            b = Math.floor(a * newState.B + (1 - a) * 255);
-
+        
         newState['res'] = "#" +
-            ("0" + r.toString(16)).slice(-2) +
-            ("0" + g.toString(16)).slice(-2) +
-            ("0" + b.toString(16)).slice(-2)
+            ("0" + newState.R.toString(16)).slice(-2) +
+            ("0" + newState.G.toString(16)).slice(-2) +
+            ("0" + newState.B.toString(16)).slice(-2) +
+            ("0" + Math.floor(newState.A*0.01*255).toString(16)).slice(-2)
 
         setState(newState)
     }

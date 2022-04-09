@@ -3,16 +3,19 @@ import { Layout } from 'antd';
 import { Link } from 'react-router-dom'
 import { IndexLinkData, getAllLink } from '../../datas/indexLinkData'
 import './index.css'
-const { Header, Footer, Sider, Content } = Layout;
+import axios from 'axios';
+const { Header, Footer, Content } = Layout;
 
 export default function Index() {
     let linkData = getAllLink()
+      
     return (
         <Layout className='Index'>
             <Header className='header'>
                 <h2>Welcome to lasting website</h2>
             </Header>
             <Content className='content'>
+                <a target='_blank' rel='noreferrer' href='http://localhost:3000'>review</a>
                 {linkData.map((i) => { return (IndexApp(i)) })}
             </Content>
             <Footer className='footer'>
