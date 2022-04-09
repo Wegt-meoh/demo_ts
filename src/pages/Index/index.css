@@ -1,5 +1,4 @@
 .Index{
-    position: relative;
     width: var(--app-width);
     --primary-color:rgb(162, 242, 206);
     background-color: var(--primary-color);
@@ -8,9 +7,14 @@
     height: 90px;
     text-align: center;
     margin: auto;
+    background: none;
 }
 .Index>.content{
     background-color: white;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
 }
 .Index>footer{
     background-color: rgb(221, 218, 218);

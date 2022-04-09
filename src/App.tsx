@@ -3,12 +3,16 @@ import './App.css';
 import { Routes, Route, Link } from 'react-router-dom';
 
 import Index from './pages/Index';
+import ReviewForCollageClass from './pages/reviewForCollageClass';
+import RgbToHex from './pages/rgba2hex';
 
 function App() {
   return (
     <div className="App">
       <Routes>
         <Route index element={<Index/>} />
+        <Route path='/app/ReviewForCollageClass' element={<ReviewForCollageClass/>}/>
+        <Route path='/app/rgba2hex' element={<RgbToHex/>}/>
         <Route path='*' element={<NoMatchPage />}/>
       </Routes>
     </div>
