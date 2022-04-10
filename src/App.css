@@ -6,6 +6,6 @@
 }
 .App{
     --app-width:1000px;
-    width: var(--app-width);
+    /* width: var(--app-width); */
     margin: auto;
 }

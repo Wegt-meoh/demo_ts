@@ -1,0 +1,144 @@
+.boldFontColor {
+    color: #34495e
+}
+
+.normalFontColor {
+    color: #505d6b
+}
+
+.lightFontColor {
+    color: #858585;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.ReviewForCollegeClass {
+    --theme-color: #42b983;
+    font-size: 15px;
+    text-align: center;
+}
+
+.ReviewForCollegeClass-header {
+    background-color: rgb(122, 186, 215);
+}
+
+.ReviewForCollegeClass-sider {
+    padding-top: 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    text-align: start;
+    width: 300px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(0, 0, 0, .07);
+    /* background-color: rgb(249, 253, 209); */
+}
+
+.ReviewForCollegeClass-sider::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ReviewForCollegeClass-sider:-webkit-scrollbar-thumb,
+.ReviewForCollegeClass-sider:hover::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.ReviewForCollegeClass-sider:hover::-webkit-scrollbar-thumb {
+    background: rgb(176, 176, 176);
+    border-radius: 4px;
+}
+
+.ReviewForCollegeClass-sider:hover::-webkit-scrollbar-track {
+    background-color: rgb(229, 228, 228);
+}
+
+.ReviewForCollegeClass-sider-nav {
+    z-index: 20;
+    line-height: 2em;
+    height: 2000px;
+}
+
+.ReviewForCollegeClass-sider-nav ul,
+.ReviewForCollegeClass-sider-nav ul li {
+    list-style: none;
+}
+
+.ReviewForCollegeClass-sider-nav ul li a {
+    color: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-bottom: none;
+    display: block;
+}
+
+.ReviewForCollegeClass-sider-nav ul li a:hover {
+    text-decoration: underline;
+}
+
+.ReviewForCollegeClass-sider-nav ul {
+    margin: 0 0 0 15px;
+    padding: 0;
+}
+
+.ReviewForCollegeClass-sider-nav-li-active {
+    color: var(--theme-color, #42b983);
+    border-right: 2px solid var(--theme-color, #42b983);
+}
+
+.ReviewForCollegeClass-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 300px;
+    bottom: 0;
+    text-align: start;
+    width: auto;
+    padding-top: 60px;
+    /* background-color: turquoise; */
+}
+
+.ReviewForCollegeClass-content-artical {
+    margin: 0 auto;
+    max-width: 80%;
+    padding: 30px 15px 40px;
+    position: relative;
+}
+
+.ReviewForCollegeClass-content-artical p {
+    height: 1000px;
+    background-color: rgb(202, 229, 236);
+}
+
+.ReviewForCollegeClass-content-artical a{
+    color: #34495e;    
+}
+
+.ReviewForCollegeClass-content-artical a:hover{
+    text-decoration: underline var(--theme-color);
+}
+
+.ReviewForCollegeClass-content-artical h3 {
+    font-size: 1.5rem;
+    margin: 40px 0 0.6rem;
+    margin-top: 40px;
+    margin-right: 0px;
+    margin-bottom: 0.6rem;
+    margin-left: 0px;
+}
+
+.ReviewForCollegeClass-content-artical h2 {
+    font-size: 1.75rem;
+    margin: 45px 0 0.8rem;
+}
+
+.ReviewForCollegeClass-content-artical h1 {
+    font-size: 2rem;
+    margin: 0 0 1rem;
+}
