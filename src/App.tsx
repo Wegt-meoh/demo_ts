@@ -4,12 +4,14 @@ import { Routes, Route, Link } from 'react-router-dom';
 
 import Index from './pages/Index';
 import RgbaToHex from './pages/rgba2hex';
+import ReviewForCollegeClass from './pages/ReviewForCollegeClass';
 
 function App() {
   return (
     <div className="App">
       <Routes>
         <Route index element={<Index/>} />
+        <Route path='/app/reviewForCollegeClass' element={<ReviewForCollegeClass/>}/>
         <Route path='/app/rgba2hex' element={<RgbaToHex/>}/>
         <Route path='*' element={<NoMatchPage />}/>
       </Routes>

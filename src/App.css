@@ -5,6 +5,7 @@
     padding: 0;
 }
 .App{
-    --app-width:1000px
-    width: var(var(--app-width));
+    --app-width:1000px;
+    width: var(--app-width);
+    margin: auto;
 }

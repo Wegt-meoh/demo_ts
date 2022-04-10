@@ -5,6 +5,7 @@
 }
 
 let dataList:Array<IndexLinkData>=[
+    {id:'1',destination:'/app/reviewForCollegeClass',showText:'review for college class'},
     {id:'4',destination:'/app/rgba2hex',showText:'rgb to hex'},
     {id:'6',destination:'/app/recommendBooks',showText:'推荐书单'}    
 ]
