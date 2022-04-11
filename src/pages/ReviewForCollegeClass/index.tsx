@@ -1,45 +1,56 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { DocsfyHeaderLink, DocsifyLink } from '../../components/DocsifyComponents'
 
 
 import './index.css'
 
 export default function ReviewForCollegeClass() {
 
-  interface CheckHashHref{
-    [index:string]:boolean
+  interface CheckHashHref {
+    [index: string]: boolean
   }
 
-  let [state,setState]=useState<CheckHashHref>({'#html':false,'#a标签':false,'#h1标签':false})
-  let hashId=useLocation()
-  useEffect(()=>{
-    let hash=decodeURI(hashId.hash)
-    if(hash==='') return;
-    let newState={...state} 
-    for(let i in newState){
-      if(i!==hash){
-        newState[i]=false
-      }else{
-        newState[i]=true
+  let [state, setState] = useState<CheckHashHref>({})
+  let hashId = useLocation()
+
+  let registerLinkState = (linkHash: string) => {
+    state[linkHash]=false
+  }
+
+  function linkHighlight(hash: string) {
+    if (state[hash] === undefined) return
+    let newState = { ...state }
+    for (let i in newState) {
+      if (i !== hash) {
+        newState[i] = false
+      } else {
+        newState[i] = true
       }
     }
-    setState({...newState})
-  },[hashId.hash])
+    setState({ ...newState })
+  }
+  useEffect(() => {
+    linkHighlight(hashId.hash)
+  }, [hashId.hash])
+
+
 
   return (
     <div className='ReviewForCollegeClass'>
       <div className='ReviewForCollegeClass-sider'>
         <div className='ReviewForCollegeClass-sider-nav'>
           <ul>
-            <li className={state['#html']?'ReviewForCollegeClass-sider-nav-li-active':''}>
-              <a href="#html">html</a>
-            </li>
+            <DocsifyLink
+              className={state[encodeURI('#html')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
+              html
+            </DocsifyLink>
             <ul>
-              <li className={state['#a标签']?'ReviewForCollegeClass-sider-nav-li-active':''}>
+              <li className={state[encodeURI('#a标签')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
                 <a href="#a标签">a标签</a>
               </li>
-              <li className={state['#h1标签']?'ReviewForCollegeClass-sider-nav-li-active':''}>
+              <li className={state[encodeURI('#h1标签')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
                 <a href="#h1标签">h1标签</a>
               </li>
             </ul>
@@ -62,22 +73,22 @@ export default function ReviewForCollegeClass() {
       </div>
       <div className='ReviewForCollegeClass-content'>
         <div className="ReviewForCollegeClass-content-artical">
-          <h1 id='html'>
-            <a href="#html">
-              html
-            </a>
-          </h1>
-          <h2 id='a标签'>
-            <a href="#a标签">
-              a标签
-            </a>
-          </h2>
+          <DocsfyHeaderLink size='h1' register={registerLinkState} state={state}>
+            html
+          </DocsfyHeaderLink>
+          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
+            a标签
+          </DocsfyHeaderLink>
           <p>sdfdsafasfdasfas</p>
-          <h2 id='h1标签'>
-            <a href="#h1标签">
-              h1标签
-            </a>
-          </h2>
+          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
+            h1标签
+          </DocsfyHeaderLink>
+          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
+            h1标签
+          </DocsfyHeaderLink>
+          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
+            html
+          </DocsfyHeaderLink>
           <p>safdsafadsfasfasdfgfdagfdg</p>
         </div>
       </div>
