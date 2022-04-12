@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react'
 
 interface DocsfyHeaderLinkProps {
     size: 'h1' | 'h2' | 'h3',
-    children: string,
+    title: string,
     register: Function,
     state: any
 }
 
 
-export function DocsfyHeaderLink({ size, children, register, state }: DocsfyHeaderLinkProps) {
-    let [headerId,setHeaderId]=useState<string>(children)
-    let [hrefHash,setHrefHash]=useState<string>('#'+encodeURI(children))
+export function DocsfyHeaderLink({ size, title, register, state }: DocsfyHeaderLinkProps) {
+    let [headerId,setHeaderId]=useState<string>(title)
+    let [hrefHash,setHrefHash]=useState<string>('#'+encodeURI(title))
+    // By default, effects run after every completed render,
+    // but you can choose to fire them only when certain values have changed.
+    // If you want to run an effect and clean it up only once (on mount and unmount),
+    // you can pass an empty array ([]) as a second argument.
     useEffect(() => {
         if (state[hrefHash] === undefined) {
             register(hrefHash)
@@ -23,12 +27,12 @@ export function DocsfyHeaderLink({ size, children, register, state }: DocsfyHead
             setHrefHash(hrefHash+'-'+index)
             register(hrefHash)
         }
-    }, [children])
+    }, [])
     if (size === 'h1') {
         return (
             <h1 id={headerId}>
                 <a href={hrefHash}>
-                    {children}
+                    {title}
                 </a>
             </h1>
         )
@@ -36,7 +40,7 @@ export function DocsfyHeaderLink({ size, children, register, state }: DocsfyHead
         return (
             <h2 id={headerId}>
                 <a href={hrefHash}>
-                    {children}
+                    {title}
                 </a>
             </h2>
         )
@@ -44,7 +48,7 @@ export function DocsfyHeaderLink({ size, children, register, state }: DocsfyHead
         return (
             <h3 id={headerId}>
                 <a href={hrefHash}>
-                    {children}
+                    {title}
                 </a>
             </h3>
         )
@@ -52,14 +56,15 @@ export function DocsfyHeaderLink({ size, children, register, state }: DocsfyHead
 }
 
 interface DocsifyLinkProps {
-    className: string
-    children: string | undefined
+    state: any
+    href: string
+    title:string
 }
 
-export function DocsifyLink({ className, children }: DocsifyLinkProps) {
+export function DocsifyLink({ state, href ,title}: DocsifyLinkProps) {
     return (
-        <li className={className}>
-            <a href="#html">{children}</a>
+        <li className={state[href]?'.ReviewForCollegeClass-sider-nav-li-active':''}>
+            <a href="#html">{title}</a>
         </li>
     )
 }

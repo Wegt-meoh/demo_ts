@@ -16,22 +16,23 @@ export default function ReviewForCollegeClass() {
   let hashId = useLocation()
 
   let registerLinkState = (linkHash: string) => {
-    state[linkHash]=false
+    state[linkHash] = false
   }
 
-  function linkHighlight(hash: string) {
-    if (state[hash] === undefined) return
-    let newState = { ...state }
-    for (let i in newState) {
-      if (i !== hash) {
-        newState[i] = false
-      } else {
-        newState[i] = true
-      }
-    }
-    setState({ ...newState })
-  }
+  
   useEffect(() => {
+    function linkHighlight(hash: string) {
+      if (state[hash] === undefined) return
+      let newState = { ...state }
+      for (let i in newState) {
+        if (i !== hash) {
+          newState[i] = false
+        } else {
+          newState[i] = true
+        }
+      }
+      setState({ ...newState })
+    }
     linkHighlight(hashId.hash)
   }, [hashId.hash])
 
@@ -43,9 +44,9 @@ export default function ReviewForCollegeClass() {
         <div className='ReviewForCollegeClass-sider-nav'>
           <ul>
             <DocsifyLink
-              className={state[encodeURI('#html')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
-              html
-            </DocsifyLink>
+              title='html'
+              href='#html'
+              state={state} />
             <ul>
               <li className={state[encodeURI('#a标签')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
                 <a href="#a标签">a标签</a>
@@ -73,22 +74,11 @@ export default function ReviewForCollegeClass() {
       </div>
       <div className='ReviewForCollegeClass-content'>
         <div className="ReviewForCollegeClass-content-artical">
-          <DocsfyHeaderLink size='h1' register={registerLinkState} state={state}>
-            html
-          </DocsfyHeaderLink>
-          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
-            a标签
-          </DocsfyHeaderLink>
-          <p>sdfdsafasfdasfas</p>
-          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
-            h1标签
-          </DocsfyHeaderLink>
-          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
-            h1标签
-          </DocsfyHeaderLink>
-          <DocsfyHeaderLink size='h2' register={registerLinkState} state={state}>
-            html
-          </DocsfyHeaderLink>
+          <DocsfyHeaderLink title='html' size='h1' register={registerLinkState} state={state} />
+          <DocsfyHeaderLink title='a标签' size='h2' register={registerLinkState} state={state} />
+          <p>safds</p>
+          <DocsfyHeaderLink title='h1标签' size='h1' register={registerLinkState} state={state} />
+          <DocsfyHeaderLink title='html' size='h2' register={registerLinkState} state={state} />
           <p>safdsafadsfasfasdfgfdagfdg</p>
         </div>
       </div>
