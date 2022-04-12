@@ -124,7 +124,7 @@ html {
     text-decoration: underline var(--theme-color);
 }
 
-.ReviewForCollegeClass-content-artical h3 {
+.ReviewForCollegeClass-content-artical-h3 {
     font-size: 1.5rem;
     margin: 40px 0 0.6rem;
     margin-top: 40px;
@@ -133,12 +133,12 @@ html {
     margin-left: 0px;
 }
 
-.ReviewForCollegeClass-content-artical h2 {
+.ReviewForCollegeClass-content-artical-h2 {
     font-size: 1.75rem;
     margin: 45px 0 0.8rem;
 }
 
-.ReviewForCollegeClass-content-artical h1 {
+.ReviewForCollegeClass-content-artical-h1 {
     font-size: 2rem;
     margin: 0 0 1rem;
 }
