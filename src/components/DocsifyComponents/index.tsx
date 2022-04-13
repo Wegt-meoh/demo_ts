@@ -7,8 +7,8 @@ interface DocsifyHeaderLinkProps extends Header {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
     state: any,
-    key?:string|number
-    children?: DocsifyElement | (DocsifyElement|undefined)[]
+    key?: string | number
+    children?: DocsifyElement | (DocsifyElement | undefined)[]
 }
 
 export function DocsfyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
@@ -86,7 +86,7 @@ interface CheckHashHref {
 }
 interface DocsifyElement extends Omit<JSX.Element, 'type' | 'children'> {
     type: Function
-    props: { title: string, key?:string|number,children?: DocsifyElement | (DocsifyElement|undefined)[] }
+    props: { title: string, key?: string | number, children?: DocsifyElement | (DocsifyElement | undefined)[] }
 }
 
 
@@ -98,18 +98,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyElement | undefined>(<h1>init date</h1>)
     let hashId = useLocation()
-    let keyCount:number=0
 
-    let registerLinkState = (linkHash: string) => {
-        //you need to ensure the linkHash(param) is not repeative in state
-        state[linkHash] = false
-    }
 
-    useEffect(() => {
-        let t: DocsifyElement | undefined = getArticalElements(children)
-        console.log('use effect get artical', t)
-        setArtical(t)
-    }, [])
 
     function getNavElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
         if (children === undefined) {
@@ -148,6 +138,10 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     }
     // console.log(getNavElements(children))
 
+
+   //used for unique key in function getArticalElements
+   let keyCount: number = 0
+
     //this function allow H1,H2... p,string type for children(param) 
     //but any other type will be seemed as <></>
     function getArticalElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
@@ -161,12 +155,12 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 if (Array.isArray(children.props.children)) {
                     t = []
                     for (let i in children.props.children) {
-                        let p=getArticalElements(children.props.children[i])
-                        if(p!==undefined){
+                        let p = getArticalElements(children.props.children[i])
+                        if (p !== undefined) {
                             t.push(p)
                         }
-                        
-                    }                    
+
+                    }
                 } else {
                     t = getArticalElements(children.props.children)
                 }
@@ -203,51 +197,20 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         }
     }
 
-    // console.log(getArticalElements(children))
+    //init artical part
+    useEffect(() => {
+        let t: DocsifyElement | undefined = getArticalElements(children)
+        console.log('artical',artical)
+        setArtical(t)
+    }, [])
 
-    function dfs(children: JSX.Element | undefined) {
-        if (children === undefined) {
-            console.log('children is undefined')
-        } else if (Array.isArray(children)) {
-            for (let i in children) {
-                dfs(children[i])
-            }
-        } else {
-            console.log('children', children)
-            if (children.type !== undefined) {
-                switch (children.type) {
-                    case H3:
-                        console.log('type h3', typeof children.type);
-                        break;
-                    case H2:
-                        console.log('type h2', typeof children.type);
-                        break;
-                    case H1:
-                        console.log('type h1', typeof children.type);
-                        break;
-                    case Code:
-                        console.log('type p', typeof children.type);
-                        break;
-                    case React.Fragment:
-                        console.log('type react fragment', typeof children.type)
-                        break;
-                    default:
-                        if (typeof children.type === 'string') {
-                            console.log('type', children.type)
-                        } else {
-                            console.log('type is not string then typeof is', typeof children.type)
-                        }
-                }
-            } else {
-                console.log('no type then typeof is', typeof children)
-            }
-            if (children.props !== undefined) {
-                dfs(children.props.children)
-            }
-        }
+
+
+
+    let registerLinkState = (linkHash: string) => {
+        //you need to ensure the linkHash(param) is not repeative in state
+        state[linkHash] = false
     }
-
-    // dfs(children)
 
     useEffect(() => {
         function linkHighlight(hash: string) {
