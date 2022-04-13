@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { DocsifyContainer, H1, H2, H3 } from '../../components/DocsifyComponents'
+import { Code, DocsifyContainer, H1, H2, H3 } from '../../components/DocsifyComponents'
 
 
 import './index.css'
@@ -52,27 +52,21 @@ export default function ReviewForCollegeClass() {
 
 
   return (
-    <DocsifyContainer>
-      <a>
-        <H1 title=''/>
-        <p>
-          asdfd
-        </p>
-      </a>
+    <DocsifyContainer>      
       {/* {main()} */}
-      {/* <>
+      <>
         <H1 title='h1'>
           <H2 title='a标签'>
             <H3 title='a标签'>
-              <p>adsfadsfdsa</p>
+              <Code>adsfadsfdsa</Code>
             </H3>
           </H2>
         </H1>
         <H1 title='h1标签' />
         <H2 title='html'>
-          <p>asfasfds</p>
+          <Code>asfasfds</Code>
         </H2>
-    </> */}
+    </>
     </DocsifyContainer >
   )
 }

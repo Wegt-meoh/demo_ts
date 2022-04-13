@@ -1,15 +1,16 @@
 import { type } from 'os'
 import React, { ReactFragment, ReactNode, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { JsxEmit } from 'typescript'
 
-interface DocsfyHeaderLinkProps extends Header {
+interface DocsifyHeaderLinkProps extends Header {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
     state: any,
-    children?: JSX.Element
+    children?: DocsifyElement | (DocsifyElement|undefined)[]
 }
 
-export function DocsfyHeaderLink({ children, size, title, register, state }: DocsfyHeaderLinkProps) {
+export function DocsfyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
     let [headerId, setHeaderId] = useState<string>(title)
     let [hrefHash, setHrefHash] = useState<string>('#' + encodeURI(title))
     let sizeStyle = { h3: 'ReviewForCollegeClass-content-artical-h3', h2: 'ReviewForCollegeClass-content-artical-h2', h1: 'ReviewForCollegeClass-content-artical-h1' }
@@ -61,29 +62,40 @@ interface Header {
     children?: any
 }
 
-export function H1({ title }: Header) {
+interface CodeProps {
+    children?: string
+}
+
+export function H1(props: Header) {
     return (<></>)
 }
-export function H2({ title }: Header) {
+export function H2(props: Header) {
     return (<></>)
 }
-export function H3({ title }: Header) {
+export function H3(props: Header) {
     return (<></>)
+}
+
+export function Code(props: CodeProps) {
+    return <></>
 }
 
 interface CheckHashHref {
     [index: string]: boolean
 }
+interface DocsifyElement extends Omit<JSX.Element, 'type' | 'children'> {
+    type: Function
+    props: { title: string, children?: DocsifyElement | (DocsifyElement|undefined)[] }
+}
+
 
 interface DocsifyContainerProps {
-    children: JSX.Element
-}
-interface DocsifyElemet extends JSX.Element{
-    type:'h1'|'h2'
+    children: DocsifyElement
 }
 
 export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
+    let [artical, setArtical] = useState<DocsifyElement | undefined>(<h1>init date</h1>)
     let hashId = useLocation()
 
     let registerLinkState = (linkHash: string) => {
@@ -91,26 +103,109 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         state[linkHash] = false
     }
 
-    function getNavElements(children:JSX.Element):JSX.Element{
+    useEffect(() => {
+        let t: DocsifyElement | undefined = getArticalElements(children)
+        console.log('use effect get artical', t)
+        setArtical(t)
+    }, [])
 
-        let stack=[]
-        let _c=children
-        
+    function getNavElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
+        if (children === undefined) {
+            return undefined
+        } else if (Array.isArray(children)) {
 
-        let chi=<DocsfyHeaderLink size={'h1'} register={registerLinkState} state={undefined} title={''}/>
-        let res=<ul children={[<></>,<></>]}/>
-
-        let _children=children.props.children
-        return res
+        } else {
+            if (children.type === undefined) {
+                return undefined
+            } else {
+                switch (children.type) {
+                    case H3:
+                        return <DocsifyLink state={state} href={''} title={children.props.title as string} />
+                        break;
+                    case H2:
+                        console.log('type h2');
+                        break;
+                    case H1:
+                        console.log('type h1');
+                        break;
+                    case Code:
+                        console.log('type p');
+                        break;
+                    case React.Fragment:
+                        console.log('type react fragment')
+                        break;
+                    default:
+                        if (typeof children.type === 'string') {
+                            console.log('type', children.type)
+                        } else {
+                            console.log('type is not string then typeof is', typeof children.type)
+                        }
+                }
+            }
+        }
     }
     // console.log(getNavElements(children))
-    function getArticalElements(children:JSX.Element){
 
+    //this function allow H1,H2... p,string type for children(param) 
+    //but any other type will be seemed as <></>
+    function getArticalElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
+        if (children === undefined) {
+            return undefined
+        } else {
+            if (children.type === undefined) {
+                return undefined
+            } else {
+                let t
+                if (Array.isArray(children.props.children)) {
+                    t = []
+                    for (let i in children.props.children) {
+                        t.push(getArticalElements(children.props.children[i]))
+                    }
+                } else {
+                    t = getArticalElements(children.props.children)
+                }
+                switch (children.type) {
+                    case H3:
+                        return <DocsfyHeaderLink size={'h3'}
+                            register={registerLinkState}
+                            state={state}
+                            title={children.props.title}
+                            children={t} />
+                    case H2:
+                        return <DocsfyHeaderLink size={'h2'}
+                            register={registerLinkState}
+                            state={state}
+                            title={children.props.title}
+                            children={t} />
+                    case H1:
+                        return <DocsfyHeaderLink size={'h1'}
+                            register={registerLinkState}
+                            state={state}
+                            title={children.props.title}
+                            children={t} />
+                    case Code:
+                        return <p>{children.props.children}</p>
+                    case React.Fragment:
+                        return <>{t}</>
+                    default:
+                        if (typeof children.type === 'string') {
+                            console.log('type', children.type)
+                            return children
+                        } else {
+                            console.log('type is not string then typeof is', typeof children.type)
+                            return <>{t}</>
+                        }
+                }
+            }
+        }
     }
-    function dfs(children: JSX.Element) {
-        if(children===undefined){
+
+    // console.log(getArticalElements(children))
+
+    function dfs(children: JSX.Element | undefined) {
+        if (children === undefined) {
             console.log('children is undefined')
-        }else if (Array.isArray(children)) {
+        } else if (Array.isArray(children)) {
             for (let i in children) {
                 dfs(children[i])
             }
@@ -119,25 +214,25 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             if (children.type !== undefined) {
                 switch (children.type) {
                     case H3:
-                        console.log('type h3');
+                        console.log('type h3', typeof children.type);
                         break;
                     case H2:
-                        console.log('type h2');
+                        console.log('type h2', typeof children.type);
                         break;
                     case H1:
-                        console.log('type h1');
+                        console.log('type h1', typeof children.type);
                         break;
-                    case 'p':
-                        console.log('type p');
+                    case Code:
+                        console.log('type p', typeof children.type);
                         break;
                     case React.Fragment:
-                        console.log('type react fragment')
+                        console.log('type react fragment', typeof children.type)
                         break;
                     default:
-                        if(typeof children.type==='string'){
-                            console.log('type',children.type)
-                        }else{
-                            console.log('type is not string then typeof is',typeof children.type)
+                        if (typeof children.type === 'string') {
+                            console.log('type', children.type)
+                        } else {
+                            console.log('type is not string then typeof is', typeof children.type)
                         }
                 }
             } else {
@@ -149,7 +244,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         }
     }
 
-    dfs(children)
+    // dfs(children)
 
     useEffect(() => {
         function linkHighlight(hash: string) {
@@ -166,6 +261,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         }
         linkHighlight(hashId.hash)
     }, [hashId.hash])
+
+
     return (
         <div className='ReviewForCollegeClass'>
             <div className='ReviewForCollegeClass-sider'>
@@ -202,7 +299,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             </div>
             <div className='ReviewForCollegeClass-content'>
                 <div className="ReviewForCollegeClass-content-artical">
-
+                    {artical}
                 </div>
             </div>
         </div>
