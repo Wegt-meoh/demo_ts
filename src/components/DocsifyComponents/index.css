@@ -1,0 +1,144 @@
+.boldFontColor {
+    color: #34495e
+}
+
+.normalFontColor {
+    color: #505d6b
+}
+
+.lightFontColor {
+    color: #858585;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.Docsify {
+    --theme-color: #42b983;
+    font-size: 15px;
+    text-align: center;
+}
+
+.Docsify-header {
+    background-color: rgb(122, 186, 215);
+}
+
+.Docsify-sider {
+    padding-top: 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    text-align: start;
+    width: 300px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(0, 0, 0, .07);
+    /* background-color: rgb(249, 253, 209); */
+}
+
+.Docsify-sider::-webkit-scrollbar {
+    width: 4px;
+}
+
+.Docsify-sider:-webkit-scrollbar-thumb,
+.Docsify-sider:hover::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.Docsify-sider:hover::-webkit-scrollbar-thumb {
+    background: rgb(176, 176, 176);
+    border-radius: 4px;
+}
+
+.Docsify-sider:hover::-webkit-scrollbar-track {
+    background-color: rgb(229, 228, 228);
+}
+
+.Docsify-sider-nav {
+    z-index: 20;
+    line-height: 2em;
+    height: 2000px;
+}
+
+.Docsify-sider-nav ul,
+.Docsify-sider-nav ul li {
+    list-style: none;
+}
+
+.Docsify-sider-nav ul li a {
+    color: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-bottom: none;
+    display: block;
+}
+
+.Docsify-sider-nav ul li a:hover {
+    text-decoration: underline;
+}
+
+.Docsify-sider-nav ul {
+    margin: 0 0 0 15px;
+    padding: 0;
+}
+
+.Docsify-sider-nav-li-active {
+    color: var(--theme-color, #42b983);
+    border-right: 2px solid var(--theme-color, #42b983);
+}
+
+.Docsify-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 300px;
+    bottom: 0;
+    text-align: start;
+    width: auto;
+    padding-top: 60px;
+    /* background-color: turquoise; */
+}
+
+.Docsify-content-artical {
+    margin: 0 auto;
+    max-width: 80%;
+    padding: 30px 15px 40px;
+    position: relative;
+}
+
+.Docsify-content-artical p {
+    height: 1000px;
+    background-color: rgb(202, 229, 236);
+}
+
+.Docsify-content-artical a{
+    color: #34495e;    
+}
+
+.Docsify-content-artical a:hover{
+    text-decoration: underline var(--theme-color);
+}
+
+.Docsify-content-artical-h3 {
+    font-size: 1.5rem;
+    margin: 40px 0 0.6rem;
+    margin-top: 40px;
+    margin-right: 0px;
+    margin-bottom: 0.6rem;
+    margin-left: 0px;
+}
+
+.Docsify-content-artical-h2 {
+    font-size: 1.75rem;
+    margin: 45px 0 0.8rem;
+}
+
+.Docsify-content-artical-h1 {
+    font-size: 2rem;
+    margin: 0 0 1rem;
+}
