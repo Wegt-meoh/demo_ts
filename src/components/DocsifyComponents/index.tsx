@@ -7,6 +7,7 @@ interface DocsifyHeaderLinkProps extends Header {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
     state: any,
+    key?:string|number
     children?: DocsifyElement | (DocsifyElement|undefined)[]
 }
 
@@ -85,7 +86,7 @@ interface CheckHashHref {
 }
 interface DocsifyElement extends Omit<JSX.Element, 'type' | 'children'> {
     type: Function
-    props: { title: string, children?: DocsifyElement | (DocsifyElement|undefined)[] }
+    props: { title: string, key?:string|number,children?: DocsifyElement | (DocsifyElement|undefined)[] }
 }
 
 
@@ -97,6 +98,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyElement | undefined>(<h1>init date</h1>)
     let hashId = useLocation()
+    let keyCount:number=0
 
     let registerLinkState = (linkHash: string) => {
         //you need to ensure the linkHash(param) is not repeative in state
@@ -159,8 +161,12 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 if (Array.isArray(children.props.children)) {
                     t = []
                     for (let i in children.props.children) {
-                        t.push(getArticalElements(children.props.children[i]))
-                    }
+                        let p=getArticalElements(children.props.children[i])
+                        if(p!==undefined){
+                            t.push(p)
+                        }
+                        
+                    }                    
                 } else {
                     t = getArticalElements(children.props.children)
                 }
@@ -169,32 +175,29 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                         return <DocsfyHeaderLink size={'h3'}
                             register={registerLinkState}
                             state={state}
+                            key={keyCount++}
                             title={children.props.title}
                             children={t} />
                     case H2:
                         return <DocsfyHeaderLink size={'h2'}
                             register={registerLinkState}
                             state={state}
+                            key={keyCount++}
                             title={children.props.title}
                             children={t} />
                     case H1:
                         return <DocsfyHeaderLink size={'h1'}
                             register={registerLinkState}
                             state={state}
+                            key={keyCount++}
                             title={children.props.title}
                             children={t} />
                     case Code:
-                        return <p>{children.props.children}</p>
+                        return <p key={keyCount++}>{children.props.children}</p>
                     case React.Fragment:
                         return <>{t}</>
                     default:
-                        if (typeof children.type === 'string') {
-                            console.log('type', children.type)
-                            return children
-                        } else {
-                            console.log('type is not string then typeof is', typeof children.type)
-                            return <>{t}</>
-                        }
+                        return undefined
                 }
             }
         }
