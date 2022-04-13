@@ -4,12 +4,36 @@ import { useLocation } from 'react-router-dom'
 
 type Key = string | number
 
+
+interface Header {
+    title: string
+    children?: undefined|DocsifyElement|(DocsifyElement|undefined)[]
+}
+
+export function H1(props: Header) {
+    return (<></>)
+}
+export function H2(props: Header) {
+    return (<></>)
+}
+export function H3(props: Header) {
+    return (<></>)
+}
+
+interface CodeProps {
+    key?: Key
+    children?: string
+}
+
+export function Code(props: CodeProps) {
+    return <p>{props.children}</p>
+}
+
 interface DocsifyHeaderLinkProps extends Header {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
     state: any,
     key?: Key
-    children?: DocsifyElement | (DocsifyElement | undefined)[]
 }
 
 export function DocsfyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
@@ -59,29 +83,7 @@ export function DocsifyLink({ state, href, title }: DocsifyLinkProps) {
     )
 }
 
-interface Header {
-    title: string
-    children?: any
-}
 
-interface CodeProps {
-    key?: Key
-    children?: string
-}
-
-export function H1(props: Header) {
-    return (<></>)
-}
-export function H2(props: Header) {
-    return (<></>)
-}
-export function H3(props: Header) {
-    return (<></>)
-}
-
-export function Code(props: CodeProps) {
-    return <p>{props.children}</p>
-}
 
 interface CheckHashHref {
     [index: string]: boolean
@@ -159,7 +161,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                             title={children.props.title}
                             children={t} />
                     case Code:
-                        console.log(t)
                         return <Code key={keyCount++} children={t as unknown as string} />
                     case React.Fragment:
                         return <>{t}</>

@@ -41,6 +41,16 @@ interface WritablePerson{
   age:number
 }
 
+interface Plant{
+  grow:string
+}
+
+type AAA =Plant&Animal
+
+let aaa:AAA={grow:'sd',name:'df'}
+
+console.log('& |',aaa)
+
 interface Animal{
   name:string
 }
