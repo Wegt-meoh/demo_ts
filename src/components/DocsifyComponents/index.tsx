@@ -1,13 +1,14 @@
-import { type } from 'os'
-import React, { ReactFragment, ReactNode, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { JsxEmit } from 'typescript'
+
+
+type Key = string | number
 
 interface DocsifyHeaderLinkProps extends Header {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
     state: any,
-    key?: string | number
+    key?: Key
     children?: DocsifyElement | (DocsifyElement | undefined)[]
 }
 
@@ -64,6 +65,7 @@ interface Header {
 }
 
 interface CodeProps {
+    key?: Key
     children?: string
 }
 
@@ -78,16 +80,19 @@ export function H3(props: Header) {
 }
 
 export function Code(props: CodeProps) {
-    return <></>
+    return <p>{props.children}</p>
 }
 
 interface CheckHashHref {
     [index: string]: boolean
 }
-interface DocsifyElement extends Omit<JSX.Element, 'type' | 'children'> {
+interface DocsifyElement extends Omit<JSX.Element, 'type' | 'props'> {
     type: Function
-    props: { title: string, key?: string | number, children?: DocsifyElement | (DocsifyElement | undefined)[] }
+    // props: { title: string, key?: Key, children?: DocsifyElement | (DocsifyElement | undefined)[] }
+    props: DocsifyHeaderLinkProps & CodeProps
 }
+
+
 
 
 interface DocsifyContainerProps {
@@ -101,46 +106,9 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
 
 
-    function getNavElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
-        if (children === undefined) {
-            return undefined
-        } else if (Array.isArray(children)) {
 
-        } else {
-            if (children.type === undefined) {
-                return undefined
-            } else {
-                switch (children.type) {
-                    case H3:
-                        return <DocsifyLink state={state} href={''} title={children.props.title as string} />
-                        break;
-                    case H2:
-                        console.log('type h2');
-                        break;
-                    case H1:
-                        console.log('type h1');
-                        break;
-                    case Code:
-                        console.log('type p');
-                        break;
-                    case React.Fragment:
-                        console.log('type react fragment')
-                        break;
-                    default:
-                        if (typeof children.type === 'string') {
-                            console.log('type', children.type)
-                        } else {
-                            console.log('type is not string then typeof is', typeof children.type)
-                        }
-                }
-            }
-        }
-    }
-    // console.log(getNavElements(children))
-
-
-   //used for unique key in function getArticalElements
-   let keyCount: number = 0
+    //used for unique key in function getArticalElements
+    let keyCount: number = 0
 
     //this function allow H1,H2... p,string type for children(param) 
     //but any other type will be seemed as <></>
@@ -162,7 +130,11 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
                     }
                 } else {
-                    t = getArticalElements(children.props.children)
+                    if(typeof children.props.children==='string'){
+                        t=children.props.children
+                    }else{
+                        t = getArticalElements(children.props.children)
+                    }                    
                 }
                 switch (children.type) {
                     case H3:
@@ -187,7 +159,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                             title={children.props.title}
                             children={t} />
                     case Code:
-                        return <p key={keyCount++}>{children.props.children}</p>
+                        console.log(t)
+                        return <Code key={keyCount++} children={t as unknown as string} />
                     case React.Fragment:
                         return <>{t}</>
                     default:
@@ -199,12 +172,13 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
     //init artical part
     useEffect(() => {
-        let t: DocsifyElement | undefined = getArticalElements(children)
-        console.log('artical',artical)
+        let t: DocsifyElement | undefined|string = getArticalElements(children)
         setArtical(t)
     }, [])
 
-
+    useEffect(() => {
+        console.log('artical', artical)
+    }, [artical])
 
 
     let registerLinkState = (linkHash: string) => {
