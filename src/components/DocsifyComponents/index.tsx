@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import './index.css'
 
 
 type Key = string | number
@@ -7,7 +8,7 @@ type Key = string | number
 
 interface Header {
     title: string
-    children?: undefined|DocsifyElement|(DocsifyElement|undefined)[]
+    children?: undefined | DocsifyElement | (DocsifyElement | undefined)[]
 }
 
 export function H1(props: Header) {
@@ -39,11 +40,13 @@ interface DocsifyHeaderLinkProps extends Header {
 export function DocsfyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
     let [headerId, setHeaderId] = useState<string>(title)
     let [hrefHash, setHrefHash] = useState<string>('#' + encodeURI(title))
-    let sizeStyle = { h3: 'ReviewForCollegeClass-content-artical-h3', h2: 'ReviewForCollegeClass-content-artical-h2', h1: 'ReviewForCollegeClass-content-artical-h1' }
+    let sizeStyle = { h3: 'Docsify-content-artical-h3', h2: 'Docsify-content-artical-h2', h1: 'Docsify-content-artical-h1' }
+
     // By default, effects run after every completed render,
     // but you can choose to fire them only when certain values have changed.
     // If you want to run an effect and clean it up only once (on mount and unmount),
     // you can pass an empty array ([]) as a second argument.
+    // register href here
     useEffect(() => {
         if (state[hrefHash] !== undefined) {
             //handle repeative name here
@@ -77,7 +80,7 @@ interface DocsifyLinkProps {
 
 export function DocsifyLink({ state, href, title }: DocsifyLinkProps) {
     return (
-        <li className={state[href] ? '.ReviewForCollegeClass-sider-nav-li-active' : ''}>
+        <li className={state[href] ? '.Docsify-sider-nav-li-active' : ''}>
             <a href="#html">{title}</a>
         </li>
     )
@@ -132,11 +135,11 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
                     }
                 } else {
-                    if(typeof children.props.children==='string'){
-                        t=children.props.children
-                    }else{
+                    if (typeof children.props.children === 'string') {
+                        t = children.props.children
+                    } else {
                         t = getArticalElements(children.props.children)
-                    }                    
+                    }
                 }
                 switch (children.type) {
                     case H3:
@@ -173,7 +176,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
     //init artical part
     useEffect(() => {
-        let t: DocsifyElement | undefined|string = getArticalElements(children)
+        let t: DocsifyElement | undefined | string = getArticalElements(children)
         setArtical(t)
     }, [])
 
@@ -205,19 +208,19 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
 
     return (
-        <div className='ReviewForCollegeClass'>
-            <div className='ReviewForCollegeClass-sider'>
-                <div className='ReviewForCollegeClass-sider-nav'>
+        <div className='Docsify'>
+            <div className='Docsify-sider'>
+                <div className='Docsify-sider-nav'>
                     <ul>
                         <DocsifyLink
                             title='html'
                             href='#html'
                             state={state} />
                         <ul>
-                            <li className={state[encodeURI('#a标签')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
+                            <li className={state[encodeURI('#a标签')] ? 'Docsify-sider-nav-li-active' : ''}>
                                 <a href="#a标签">a标签</a>
                             </li>
-                            <li className={state[encodeURI('#h1标签')] ? 'ReviewForCollegeClass-sider-nav-li-active' : ''}>
+                            <li className={state[encodeURI('#h1标签')] ? 'Docsify-sider-nav-li-active' : ''}>
                                 <a href="#h1标签">h1标签</a>
                             </li>
                         </ul>
@@ -238,8 +241,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                     </ul>
                 </div>
             </div>
-            <div className='ReviewForCollegeClass-content'>
-                <div className="ReviewForCollegeClass-content-artical">
+            <div className='Docsify-content'>
+                <div className="Docsify-content-artical">
                     {artical}
                 </div>
             </div>
