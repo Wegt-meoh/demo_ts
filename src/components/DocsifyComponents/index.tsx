@@ -6,18 +6,18 @@ import './index.css'
 type Key = string | number
 
 
-interface Header {
+interface HeaderProps {
     title: string
     children?: undefined | DocsifyElement | (DocsifyElement | undefined)[]
 }
 
-export function H1(props: Header) {
+export function H1(props: HeaderProps) {
     return (<></>)
 }
-export function H2(props: Header) {
+export function H2(props: HeaderProps) {
     return (<></>)
 }
-export function H3(props: Header) {
+export function H3(props: HeaderProps) {
     return (<></>)
 }
 
@@ -26,14 +26,14 @@ interface CodeProps {
     children?: string
 }
 
-export function Code(props: CodeProps) {
-    return <p>{props.children}</p>
+export function Code({children}: CodeProps) {
+    return <p>{children}</p>
 }
 
-interface DocsifyHeaderLinkProps extends Header {
+interface DocsifyHeaderLinkProps extends HeaderProps {
     size: 'h1' | 'h2' | 'h3',
     register: Function,
-    state: any,
+    state: CheckHashHref,
     key?: Key
 }
 
@@ -93,10 +93,8 @@ interface CheckHashHref {
 }
 interface DocsifyElement extends Omit<JSX.Element, 'type' | 'props'> {
     type: Function
-    // props: { title: string, key?: Key, children?: DocsifyElement | (DocsifyElement | undefined)[] }
     props: DocsifyHeaderLinkProps & CodeProps
 }
-
 
 
 
@@ -104,27 +102,32 @@ interface DocsifyContainerProps {
     children: DocsifyElement
 }
 
+
+/**
+ * notice its children should be H1, H2, H3, Code or <></> and other Component will be ignore
+ * 
+ */
 export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyElement | undefined>(<h1>init date</h1>)
     let hashId = useLocation()
 
 
-
-
     //used for unique key in function getArticalElements
     let keyCount: number = 0
 
-    //this function allow H1,H2... p,string type for children(param) 
-    //but any other type will be seemed as <></>
-    function getArticalElements(children: DocsifyElement | undefined): DocsifyElement | undefined {
+    //NOTE: Any other type will return undefined and     
+    //not to handle it children details see switch part in follow code
+    function getArticalElements(children?: DocsifyElement): DocsifyElement | undefined {
         if (children === undefined) {
             return undefined
         } else {
             if (children.type === undefined) {
                 return undefined
             } else {
-                let t
+
+                //这里递归处理children.props.children
+                let t:any
                 if (Array.isArray(children.props.children)) {
                     t = []
                     for (let i in children.props.children) {
@@ -141,6 +144,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                         t = getArticalElements(children.props.children)
                     }
                 }
+
+                //这里定义如何处理输入的组件
                 switch (children.type) {
                     case H3:
                         return <DocsfyHeaderLink size={'h3'}
@@ -164,25 +169,26 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                             title={children.props.title}
                             children={t} />
                     case Code:
-                        return <Code key={keyCount++} children={t as unknown as string} />
+                        return <Code key={keyCount++} children={t} />
                     case React.Fragment:
                         return <>{t}</>
                     default:
+                        //other element will be ignored
                         return undefined
                 }
             }
         }
     }
 
-    //init artical part
+    //init artical part when component did mount
     useEffect(() => {
         let t: DocsifyElement | undefined | string = getArticalElements(children)
         setArtical(t)
     }, [])
 
-    useEffect(() => {
-        console.log('artical', artical)
-    }, [artical])
+    // useEffect(() => {
+    //     console.log('artical', artical)
+    // }, [artical])
 
 
     let registerLinkState = (linkHash: string) => {
@@ -190,6 +196,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         state[linkHash] = false
     }
 
+    //处理导航栏link高亮，当地址栏的hash改变
     useEffect(() => {
         function linkHighlight(hash: string) {
             if (state[hash] === undefined) return
