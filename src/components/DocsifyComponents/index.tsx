@@ -108,115 +108,117 @@ interface DocsifyContainerProps {
  */
 export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
-    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<h1>init date</h1>)
+    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<h1>init data...</h1>)
     let hashId = useLocation()
 
     console.log(children)
     //used for unique key in function getArticalElements
     let keyCount: number = 0
 
-    //NOTE: Any other type will return undefined and     
-    //not to handle it children, details see following code
-    function getArticalElements(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
-        if (children === undefined) {
-            return undefined
-        } else {
-            if (children.type === undefined) {
-                return undefined
-            } else {
-                //这里递归处理children.props.children,并把返回值传给变量t
-                //NOTE: children.props.children 不一定是DocsifyElement
-                let t: any
-                let props = children.props
-                if (Array.isArray(props.children)) {
-                    t = []
 
-                    props.children.forEach((i) => {
-                        let p: string | DocsifyContainerElement | undefined
-                        if (typeof i === 'string') {
-                            p = i
-                        } else {
-                            p = getArticalElements(i)
-                        }
-                        if (p !== undefined) {
-                            t.push(p)
-                        }
-                    })
-                } else {
-                    if (typeof props.children === 'string') {
-                        t = props.children
-                    } else {
-                        t = getArticalElements(props.children)
-                    }
-                }
-
-                //这里定义如何处理输入的组件
-                switch (children.type) {
-                    case H3:
-                        props = props as HeaderProps
-                        return <DocsfyHeaderLink size={'h3'}
-                            register={registerLinkState}
-                            state={state}
-                            key={keyCount++}
-                            title={props.title}
-                            children={t} />
-                    case H2:
-                        props = props as HeaderProps
-                        return <DocsfyHeaderLink size={'h2'}
-                            register={registerLinkState}
-                            state={state}
-                            key={keyCount++}
-                            title={props.title}
-                            children={t} />
-                    case H1:
-                        props = props as HeaderProps
-                        return <DocsfyHeaderLink size={'h1'}
-                            register={registerLinkState}
-                            state={state}
-                            key={keyCount++}
-                            title={props.title}
-                            children={t} />
-                    case Code:
-                        props = props as CodeProps
-                        return <Code key={keyCount++} children={t} />
-                    case React.Fragment:
-                        return <>{t}</>
-                    default:
-                        //other element will be ignored
-                        return undefined
-                }
-            }
-        }
-    }
 
     //init artical part when component did mount
     useEffect(() => {
-        let t: DocsifyContainerElement | undefined = getArticalElements(children)
-        setArtical(t)
-    }, [])
-
-    function getNavElement(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
-        if (children === undefined) {
-            return undefined
-        } else {
-            if (children.type === undefined) {
+        //NOTE: Any other type will return undefined and     
+        //not to handle it children, details see following code
+        function getArticalElements(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
+            if (children === undefined) {
                 return undefined
             } else {
+                if (children.type === undefined) {
+                    return undefined
+                } else {
+                    //这里递归处理children.props.children,并把返回值传给变量t
+                    //NOTE: children.props.children 不一定是DocsifyElement
+                    let t: any
+                    let props = children.props
+                    if (Array.isArray(props.children)) {
+                        t = []
 
-                let t
-                if (children.props.children)
-
-                    switch (children.type) {
-                        case H1:
-                            return
+                        props.children.forEach((i) => {
+                            let p: string | DocsifyContainerElement | undefined
+                            if (typeof i === 'string') {
+                                p = i
+                            } else {
+                                p = getArticalElements(i)
+                            }
+                            if (p !== undefined) {
+                                t.push(p)
+                            }
+                        })
+                    } else {
+                        if (typeof props.children === 'string') {
+                            t = props.children
+                        } else {
+                            t = getArticalElements(props.children)
+                        }
                     }
+
+                    //这里定义如何处理输入的组件
+                    switch (children.type) {
+                        case H3:
+                            props = props as HeaderProps
+                            return <DocsfyHeaderLink size={'h3'}
+                                register={registerLinkState}
+                                state={state}
+                                key={keyCount++}
+                                title={props.title}
+                                children={t} />
+                        case H2:
+                            props = props as HeaderProps
+                            return <DocsfyHeaderLink size={'h2'}
+                                register={registerLinkState}
+                                state={state}
+                                key={keyCount++}
+                                title={props.title}
+                                children={t} />
+                        case H1:
+                            props = props as HeaderProps
+                            return <DocsfyHeaderLink size={'h1'}
+                                register={registerLinkState}
+                                state={state}
+                                key={keyCount++}
+                                title={props.title}
+                                children={t} />
+                        case Code:
+                            props = props as CodeProps
+                            return <Code key={keyCount++} children={t} />
+                        case React.Fragment:
+                            return <>{t}</>
+                        default:
+                            //other element will be ignored
+                            return undefined
+                    }
+                }
             }
         }
-    }
+        let t: DocsifyContainerElement | undefined = getArticalElements(children)
+        setArtical(t)
+    }, [children])
 
-    // useEffect(() => {
-    //     console.log('artical', artical)
-    // }, [artical])
+    
+
+    useEffect(() => {
+        function getNavElement(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
+            if (children === undefined) {
+                return undefined
+            } else {
+                if (children.type === undefined) {
+                    return undefined
+                } else {
+    
+                    let t
+                    if (children.props.children)
+    
+                        switch (children.type) {
+                            case H1:
+                                return
+                        }
+                }
+            }
+        } 
+        console.log('artical', artical)
+    }, [artical])
 
 
     let registerLinkState = (linkHash: string) => {
