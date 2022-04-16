@@ -89,7 +89,7 @@ export function DocsifyNavLink({ state, href, title }: DocsifyNavLinkProps) {
 
 
 interface CheckHashHref {
-    [index: string]: boolean
+    [index: string]: { isFoucus: boolean, haveGotten: boolean }
 }
 
 //这里定义能够作为DocsifyContaioner子元素的类型
@@ -111,7 +111,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<h1>init data...</h1>)
     let hashId = useLocation()
 
-    console.log(children)
     //used for unique key in function getArticalElements
     let keyCount: number = 0
 
@@ -196,7 +195,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         setArtical(t)
     }, [children])
 
-    
+
 
     useEffect(() => {
         function getNavElement(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
@@ -206,24 +205,24 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 if (children.type === undefined) {
                     return undefined
                 } else {
-    
                     let t
-                    if (children.props.children)
-    
+                    if (children.props.children) {
                         switch (children.type) {
                             case H1:
                                 return
                         }
+                    }
                 }
             }
-        } 
+        }
         console.log('artical', artical)
     }, [artical])
 
 
     let registerLinkState = (linkHash: string) => {
         //you need to ensure the linkHash(param) is not repeative in state
-        state[linkHash] = false
+        state[linkHash].isFoucus = false
+        state[linkHash].haveGotten = false
     }
 
     //处理导航栏link高亮，当地址栏的hash改变
@@ -233,9 +232,9 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             let newState = { ...state }
             for (let i in newState) {
                 if (i !== hash) {
-                    newState[i] = false
+                    newState[i].isFoucus = false
                 } else {
-                    newState[i] = true
+                    newState[i].isFoucus = true
                 }
             }
             setState({ ...newState })
