@@ -108,7 +108,7 @@ interface DocsifyContainerProps {
  */
 export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
-    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<h1>init data...</h1>)
+    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<p>init data...</p>)
     let hashId = useLocation()
 
     //used for unique key in function getArticalElements
