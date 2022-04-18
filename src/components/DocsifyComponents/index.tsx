@@ -73,20 +73,42 @@ export function DocsfyHeaderLink({ children, size, title, register, state }: Doc
 }
 
 interface DocsifyNavLinkProps {
-    state: any
+    state: CheckHashHref
     href: string
     title: string
 }
 
 export function DocsifyNavLink({ state, href, title }: DocsifyNavLinkProps) {
+    let isFoucus
+    if (state[href] === undefined) {
+        isFoucus = false
+    } else if (state[href].isFoucus === undefined) {
+        isFoucus = false
+    } else {
+        isFoucus = state[href].isFoucus
+    }
+
     return (
-        <li className={state[href] ? '.Docsify-sider-nav-li-active' : ''}>
-            <a href="#html">{title}</a>
+        <li className={isFoucus ? '.Docsify-sider-nav-li-active' : ''}>
+            <a href={href}>{title}</a>
         </li>
     )
 }
 
 
+interface DocsifyNavFrameProps {
+    children?: DocsifyNavElement | DocsifyNavElement[]
+    key?: Key
+}
+
+export function DocsifyNavFrame({ children }: DocsifyNavFrameProps) {
+    return <ul>{children}</ul>
+}
+
+interface DocsifyNavElement {
+    type: Function
+    props: DocsifyNavFrameProps | DocsifyNavLinkProps
+}
 
 interface CheckHashHref {
     [index: string]: { isFoucus: boolean, haveGotten: boolean }
@@ -108,7 +130,8 @@ interface DocsifyContainerProps {
  */
 export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
-    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>(<p>init data</p>)
+    let [artical, setArtical] = useState<DocsifyContainerElement | undefined>()
+    let [navBar, setNavBar] = useState<DocsifyNavElement | undefined>()
     let hashId = useLocation()
 
     //used for unique key in function getArticalElements
@@ -191,38 +214,78 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 }
             }
         }
-        let t: DocsifyContainerElement | undefined = getArticalElements(children)
-        setArtical(t)
+        setArtical(getArticalElements(children))
     }, [children])
 
 
 
     useEffect(() => {
-        function getNavElement(children?: DocsifyContainerElement): DocsifyContainerElement | undefined {
+        console.log('@@@children',children)
+        function getNavElement(children?: DocsifyContainerElement): DocsifyNavElement | undefined {
             if (children === undefined) {
                 return undefined
             } else {
                 if (children.type === undefined) {
                     return undefined
                 } else {
-                    let t
-                    if (children.props.children) {
-                        switch (children.type) {
-                            case H1:
-                                return
+                    let t: DocsifyNavElement | DocsifyNavElement[] | undefined
+                    let props = children.props
+                    if (Array.isArray(props.children)) {
+                        t = []
+                        props.children.forEach((i) => {
+                            t = t as DocsifyNavElement[]
+                            if (typeof i !== 'string') {
+                                let p = getNavElement(i)
+                                if (p !== undefined) {
+                                    t.push(p)
+                                }
+                            }
+                        })
+                        if (t.length === 1) {
+                            t = t[0] as DocsifyNavElement
                         }
+                    } else if (typeof props.children === 'string') {
+                        t = undefined
+                    } else {
+                        t = getNavElement(props.children)
+                    }
+
+                    switch (children.type) {
+                        case H3:
+                        case H2:
+                        case H1:
+                            if (t === undefined) {
+                                return (
+                                    <DocsifyNavLink key={keyCount++} state={state} href={''} title={'html'} />
+                                )
+                            } else {
+                                return (
+                                    <React.Fragment key={keyCount++}>
+                                        <DocsifyNavLink state={state} href={''} title={'html'} />
+                                        <DocsifyNavFrame>{t}</DocsifyNavFrame>
+                                    </React.Fragment>
+                                )
+                            }
+
+                        case React.Fragment:
+                            return (
+                                <React.Fragment key={keyCount++}>{t}</React.Fragment>
+                            )
+                        default:
+                            return undefined
+
                     }
                 }
             }
         }
-        console.log('artical', artical)
+        setNavBar(getNavElement(children))
     }, [artical])
 
 
     let registerLinkState = (linkHash: string) => {
         //you need to ensure the linkHash(param) is not repeative in state
-        state[linkHash].isFoucus = false
-        state[linkHash].haveGotten = false
+        let t = { isFoucus: false, haveGotten: false }
+        state[linkHash] = t
     }
 
     //处理导航栏link高亮，当地址栏的hash改变
@@ -248,6 +311,9 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             <div className='Docsify-sider'>
                 <div className='Docsify-sider-nav'>
                     <ul>
+                        {navBar}
+                    </ul>
+                    {/* <ul>
                         <DocsifyNavLink
                             title='html'
                             href='#html'
@@ -274,7 +340,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                             <li><a href="">type</a></li>
                             <li><a href="">interface</a></li>
                         </ul>
-                    </ul>
+                    </ul> */}
                 </div>
             </div>
             <div className='Docsify-content'>
