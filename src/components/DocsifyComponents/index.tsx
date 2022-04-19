@@ -52,9 +52,12 @@ export function DocsifyHeaderLink({ children, size, title, register, state }: Do
             while (state[hrefHash + '-' + index] !== undefined) {
                 index++
             }
+            hrefHash = hrefHash + '-' + index
+            headerId = headerId + '-' + index
             //then you need rerender the component
-            setHeaderId(headerId + '-' + index)
-            setHrefHash(hrefHash + '-' + index)
+            setHeaderId(headerId)
+            setHrefHash(hrefHash)
+
         }
         register(hrefHash)
     }, [])
@@ -71,20 +74,25 @@ export function DocsifyHeaderLink({ children, size, title, register, state }: Do
 }
 
 interface DocsifyNavLinkProps {
-    state: CheckHashHref
+    state?: CheckHashHref
     href: string  // 指向某一个锚点的地址
     title: string // 展示给用户的内容
 }
 
 export function DocsifyNavLink({ state, href, title }: DocsifyNavLinkProps) {
     let isFoucus
-    if (state[href] === undefined) {
-        isFoucus = false
-    } else if (state[href].isFoucus === undefined) {
-        isFoucus = false
-    } else {
-        isFoucus = state[href].isFoucus
-    }
+    useEffect(() => {
+        console.log('@@DocsifyNavLink:state or href changed')
+        if (state === undefined) {
+            isFoucus = false
+        } else if (state[href] === undefined) {
+            isFoucus = false
+        } else if (state[href].isFoucus === undefined) {
+            isFoucus = false
+        } else {
+            isFoucus = state[href].isFoucus
+        }
+    }, [state, href])
 
     return (
         <li className={isFoucus ? '.Docsify-sider-nav-li-active' : ''}>
@@ -132,12 +140,12 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [navBar, setNavBar] = useState<DocsifyNavElement | undefined>()
     let hashId = useLocation()
 
-    //used for unique key in function getArticalElements
-    let keyCount: number = 0
+    //used for unique key to avoid warning
+    let keyCount = 0
 
 
 
-    //init artical part when component did mount
+    //init artical part after children changed
     useEffect(() => {
         //NOTE: Any other type will return undefined and     
         //not to handle it children, details see following code
@@ -166,10 +174,10 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 t.push(p)
                             }
                         })
-                        if(t.length===0){
-                            t=undefined
-                        }else if(t.length===1){
-                            t=t[0]
+                        if (t.length === 0) {
+                            t = undefined
+                        } else if (t.length === 1) {
+                            t = t[0]
                         }
                     } else {
                         if (typeof props.children === 'string') {
@@ -222,7 +230,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             }
         }
         setArtical(getArticalElements(children))
-    }, [children])
+    }, [])
 
 
 
@@ -247,9 +255,9 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 }
                             }
                         })
-                        if(t.length===0){
-                            t=undefined
-                        }else if (t.length === 1) {
+                        if (t.length === 0) {
+                            t = undefined
+                        } else if (t.length === 1) {
                             t = t[0]
                         }
                     } else if (typeof props.children === 'string') {
@@ -262,14 +270,40 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                         case H3:
                         case H2:
                         case H1:
+
+                            //according to title calculate the value of _href from state
+                            props = props as HeaderProps
+                            let title = props.title
+                            let _index = 1, _href = '#' + encodeURI(title)
+                            if (state[_href] === undefined) {
+                                // console.log('@@state[_href]===undefined')
+                                _href = '#'
+                            } else if (state[_href].haveGotten === true) {
+                                while (state[_href + '-' + _index] !== undefined && state[_href + '-' + _index].haveGotten === true) {
+                                    _index++
+                                }
+                                if (state[_href + '-' + _index] === undefined) {
+                                    // console.log('@@state[_href+-+_index]===undefined')
+                                    _href = '#'
+                                } else {
+                                    // console.log('@@successful')
+                                    _href = _href + '-' + _index
+                                    state[_href].haveGotten = true
+                                }
+                            } else {
+                                // console.log('@@state[_href] first meet')
+                                state[_href].haveGotten = true
+                            }
+
+                            //according to is having children return different coomponents
                             if (t === undefined) {
                                 return (
-                                    <DocsifyNavLink key={keyCount++} state={state} href={''} title={'html'} />
+                                    <DocsifyNavLink key={keyCount++} href={_href} title={title} />
                                 )
                             } else {
                                 return (
                                     <React.Fragment key={keyCount++}>
-                                        <DocsifyNavLink state={state} href={''} title={'html'} />
+                                        <DocsifyNavLink href={_href} title={title} />
                                         <DocsifyNavFrame>{t}</DocsifyNavFrame>
                                     </React.Fragment>
                                 )
@@ -312,17 +346,17 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             }
             setState({ ...newState })
         }
+        // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(hashId.hash)
     }, [hashId.hash])
+
 
 
     return (
         <div className='Docsify'>
             <div className='Docsify-sider'>
                 <div className='Docsify-sider-nav'>
-                    <ul>
-                        {navBar}
-                    </ul>
+                    <ul>{navBar}</ul>
                 </div>
             </div>
             <div className='Docsify-content'>
