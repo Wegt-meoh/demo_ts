@@ -22,7 +22,6 @@ export function H3(props: HeaderProps) {
 }
 
 interface CodeProps {
-    key?: Key
     children?: string
 }
 
@@ -31,13 +30,12 @@ export function Code({ children }: CodeProps) {
 }
 
 interface DocsifyHeaderLinkProps extends HeaderProps {
-    size: 'h1' | 'h2' | 'h3',
-    register: Function,
-    state: CheckHashHref,
-    key?: Key
+    size: 'h1' | 'h2' | 'h3'
+    register: Function
+    state: CheckHashHref
 }
 
-export function DocsfyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
+export function DocsifyHeaderLink({ children, size, title, register, state }: DocsifyHeaderLinkProps) {
     let [headerId, setHeaderId] = useState<string>(title)
     let [hrefHash, setHrefHash] = useState<string>('#' + encodeURI(title))
     let sizeStyle = { h3: 'Docsify-content-artical-h3', h2: 'Docsify-content-artical-h2', h1: 'Docsify-content-artical-h1' }
@@ -74,8 +72,8 @@ export function DocsfyHeaderLink({ children, size, title, register, state }: Doc
 
 interface DocsifyNavLinkProps {
     state: CheckHashHref
-    href: string
-    title: string
+    href: string  // 指向某一个锚点的地址
+    title: string // 展示给用户的内容
 }
 
 export function DocsifyNavLink({ state, href, title }: DocsifyNavLinkProps) {
@@ -98,13 +96,13 @@ export function DocsifyNavLink({ state, href, title }: DocsifyNavLinkProps) {
 
 interface DocsifyNavFrameProps {
     children?: DocsifyNavElement | DocsifyNavElement[]
-    key?: Key
 }
 
 export function DocsifyNavFrame({ children }: DocsifyNavFrameProps) {
     return <ul>{children}</ul>
 }
 
+//the type of function getNavElements return
 interface DocsifyNavElement {
     type: Function
     props: DocsifyNavFrameProps | DocsifyNavLinkProps
@@ -114,8 +112,8 @@ interface CheckHashHref {
     [index: string]: { isFoucus: boolean, haveGotten: boolean }
 }
 
-//这里定义能够作为DocsifyContaioner子元素的类型
-interface DocsifyContainerElement extends Omit<JSX.Element, 'type' | 'props'> {
+//DocsifyContainer子元素的类型
+interface DocsifyContainerElement {
     type: Function
     props: CodeProps | HeaderProps
 }
@@ -152,12 +150,12 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 } else {
                     //这里递归处理children.props.children,并把返回值传给变量t
                     //NOTE: children.props.children 不一定是DocsifyElement
-                    let t: any
+                    let t: string | (string | DocsifyContainerElement)[] | DocsifyContainerElement | undefined
                     let props = children.props
                     if (Array.isArray(props.children)) {
                         t = []
-
                         props.children.forEach((i) => {
+                            t = t as (string | DocsifyContainerElement)[]
                             let p: string | DocsifyContainerElement | undefined
                             if (typeof i === 'string') {
                                 p = i
@@ -168,6 +166,11 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 t.push(p)
                             }
                         })
+                        if(t.length===0){
+                            t=undefined
+                        }else if(t.length===1){
+                            t=t[0]
+                        }
                     } else {
                         if (typeof props.children === 'string') {
                             t = props.children
@@ -180,7 +183,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                     switch (children.type) {
                         case H3:
                             props = props as HeaderProps
-                            return <DocsfyHeaderLink size={'h3'}
+                            return <DocsifyHeaderLink size={'h3'}
                                 register={registerLinkState}
                                 state={state}
                                 key={keyCount++}
@@ -188,7 +191,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 children={t} />
                         case H2:
                             props = props as HeaderProps
-                            return <DocsfyHeaderLink size={'h2'}
+                            return <DocsifyHeaderLink size={'h2'}
                                 register={registerLinkState}
                                 state={state}
                                 key={keyCount++}
@@ -196,7 +199,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 children={t} />
                         case H1:
                             props = props as HeaderProps
-                            return <DocsfyHeaderLink size={'h1'}
+                            return <DocsifyHeaderLink size={'h1'}
                                 register={registerLinkState}
                                 state={state}
                                 key={keyCount++}
@@ -204,12 +207,16 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 children={t} />
                         case Code:
                             props = props as CodeProps
-                            return <Code key={keyCount++} children={t} />
+                            return <Code key={keyCount++} children={t as string} />
                         case React.Fragment:
-                            return <>{t}</>
+
                         default:
                             //other element will be ignored
-                            return undefined
+                            return (
+                                <div key={keyCount++}>
+                                    {t}
+                                </div>
+                            )
                     }
                 }
             }
@@ -220,7 +227,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
 
     useEffect(() => {
-        console.log('@@@children',children)
         function getNavElement(children?: DocsifyContainerElement): DocsifyNavElement | undefined {
             if (children === undefined) {
                 return undefined
@@ -241,8 +247,10 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 }
                             }
                         })
-                        if (t.length === 1) {
-                            t = t[0] as DocsifyNavElement
+                        if(t.length===0){
+                            t=undefined
+                        }else if (t.length === 1) {
+                            t = t[0]
                         }
                     } else if (typeof props.children === 'string') {
                         t = undefined
@@ -269,7 +277,9 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
                         case React.Fragment:
                             return (
-                                <React.Fragment key={keyCount++}>{t}</React.Fragment>
+                                <React.Fragment key={keyCount++}>
+                                    {t}
+                                </React.Fragment>
                             )
                         default:
                             return undefined
@@ -313,34 +323,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                     <ul>
                         {navBar}
                     </ul>
-                    {/* <ul>
-                        <DocsifyNavLink
-                            title='html'
-                            href='#html'
-                            state={state} />
-                        <ul>
-                            <li className={state[encodeURI('#a标签')] ? 'Docsify-sider-nav-li-active' : ''}>
-                                <a href="#a标签">a标签</a>
-                            </li>
-                            <li className={state[encodeURI('#h1标签')] ? 'Docsify-sider-nav-li-active' : ''}>
-                                <a href="#h1标签">h1标签</a>
-                            </li>
-                        </ul>
-                        <li>
-                            <a href="#css">css</a>
-                        </li>
-                        <ul>
-                            <li><a href="">width</a></li>
-                            <li><a href="">scoll bar</a></li>
-                        </ul>
-                        <li>
-                            <a href="">typescript</a>
-                        </li>
-                        <ul>
-                            <li><a href="">type</a></li>
-                            <li><a href="">interface</a></li>
-                        </ul>
-                    </ul> */}
                 </div>
             </div>
             <div className='Docsify-content'>
