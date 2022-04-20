@@ -26,7 +26,34 @@ interface CodeProps {
 }
 
 export function Code({ children }: CodeProps) {
-    return <p>{children}</p>
+    let res:string[]=[]
+    //format code string here
+    if(children!==undefined){        
+        let line=''
+        for(let i=0;i<children.length;i++){
+            if(children[i]==='&'){
+                res.push(line)
+                line=''                
+            }else if(children[i]==='@'){
+                line+=' '
+            }else{                
+                line+=children[i]
+            }
+        }
+        if(line.length!==0) res.push(line)
+    }
+
+    
+    return (
+        <p>
+            {
+                res.map((i,index)=>{
+                    console.log(i)
+                    return <React.Fragment key={index}>{i}<br/></React.Fragment>
+                })
+            }
+        </p>
+    )
 }
 
 interface DocsifyHeaderLinkProps extends HeaderProps {
@@ -287,7 +314,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                                 state[_href].haveGotten = true
                                 isActive=state[_href].isFoucus
                             }
-                            console.log('@@',isActive)
                             //according to is having children return different components
                             if (t === undefined) {
                                 return (
