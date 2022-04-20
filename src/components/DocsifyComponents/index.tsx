@@ -251,7 +251,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     //init nav part after artical changed
     useEffect(() => {
         function getNavElement(children?: DocsifyContainerElement): DocsifyNavElement | undefined {
-            // return { type: DocsifyNavFrame, props: {children:<DocsifyNavFrame/>,ti`tle:'ds'} }
             if (children === undefined) {
                 return undefined
             } else {
@@ -372,8 +371,6 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(hashId.hash)
     }, [hashId.hash])
-
-
 
     return (
         <div className='Docsify'>
