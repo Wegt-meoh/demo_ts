@@ -112,15 +112,17 @@ html {
 }
 
 .Docsify-content-artical p {
-    height: 1000px;
-    background-color: rgb(202, 229, 236);
+    padding: 10px;
+    border-radius: 4px;
+    width: 80%;
+    background-color: rgb(231, 232, 233);
 }
 
-.Docsify-content-artical a{
-    color: #34495e;    
+.Docsify-content-artical a {
+    color: #34495e;
 }
 
-.Docsify-content-artical a:hover{
+.Docsify-content-artical a:hover {
     text-decoration: underline var(--theme-color);
 }
 
