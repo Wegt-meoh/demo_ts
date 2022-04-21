@@ -161,7 +161,13 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyContainerElement | undefined>()
     let [navBar, setNavBar] = useState<DocsifyNavElement | undefined>()
-    let hashId = useLocation()
+    let [close, SetClose] = useState(false)
+    const hashId = useLocation()
+
+    // 获取浏览器可视区域宽高（兼容性比较好，不包括工具栏和滚动条）
+    const browserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    const browserHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
 
     //used for unique key to avoid warning
     let keyCount = 0
@@ -401,14 +407,32 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         linkHighlight(hashId.hash)
     }, [hashId.hash])
 
+    useEffect(()=>{
+        console.log('browser height',browserHeight)
+        console.log('browser width',browserWidth)
+    },[window.innerHeight])
+
+    function handleClose() {
+        SetClose(!close)
+    }
+
     return (
         <div className='Docsify'>
-            <div className='Docsify-sider'>
+            <button onClick={handleClose}
+                className={close ? 'Docsify-sider-toggle Docsify-sider-toggle-close' : 'Docsify-sider-toggle'}>
+                <div>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <div
+                className={close ? 'Docsify-sider Docsify-sider-close' : 'Docsify-sider'}>
                 <div className='Docsify-sider-nav'>
                     <ul>{navBar}</ul>
                 </div>
             </div>
-            <div className='Docsify-content'>
+            <div className={close ? 'Docsify-content Docsify-content-close' : 'Docsify-content'}>
                 <div className="Docsify-content-artical">
                     {artical}
                 </div>
