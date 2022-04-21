@@ -11,7 +11,7 @@ interface HeaderProps {
     children?: DocsifyContainerElement | string | (DocsifyContainerElement | string)[]
 }
 
-type HeaderFunction = (props: HeaderProps) => JSX.Element
+type HeaderConstructor = (props: HeaderProps) => JSX.Element
 
 export function H1(props: HeaderProps) {
     return (<></>)
@@ -27,7 +27,7 @@ interface CodeProps {
     children?: string
 }
 
-type CodeFunction = (props: CodeProps) => JSX.Element
+type CodeConstructor = (props: CodeProps) => JSX.Element
 
 export function Code({ children }: CodeProps) {
     let res: string[] = []
@@ -114,7 +114,7 @@ interface DocsifyNavLinkProps {
     title: string // 展示给用户的内容
 }
 
-type DocsifyNavLinkFunction = (props: DocsifyNavLinkProps) => JSX.Element
+type DocsifyNavLinkConstructor = (props: DocsifyNavLinkProps) => JSX.Element
 
 function DocsifyNavLink({ isActive, href, title }: DocsifyNavLinkProps) {
     if (isActive === undefined) isActive = false
@@ -129,14 +129,14 @@ interface DocsifyNavFrameProps {
     children?: DocsifyNavElement | DocsifyNavElement[]
 }
 
-type DocsifyNavFrameFunction = (props: DocsifyNavFrameProps) => JSX.Element
+type DocsifyNavFrameConstructor = (props: DocsifyNavFrameProps) => JSX.Element
 
 function DocsifyNavFrame({ children }: DocsifyNavFrameProps) {
     return <ul>{children}</ul>
 }
 
 interface DocsifyNavElement {
-    type: DocsifyNavLinkFunction | DocsifyNavFrameFunction
+    type: DocsifyNavLinkConstructor | DocsifyNavFrameConstructor
     props: DocsifyNavFrameProps | DocsifyNavLinkProps
 }
 
@@ -145,7 +145,7 @@ interface CheckHashHref {
 }
 
 interface DocsifyContainerElement {
-    type: HeaderFunction | CodeFunction
+    type: HeaderConstructor | CodeConstructor
     props: CodeProps | HeaderProps
 }
 
