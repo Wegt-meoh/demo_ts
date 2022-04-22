@@ -52,7 +52,7 @@ export function Code({ children }: CodeProps) {
         <p>
             {
                 res.map((i, index) => {
-                    console.log(i)
+                    // console.log(i)
                     return <React.Fragment key={index}>{i}<br /></React.Fragment>
                 })
             }
@@ -126,13 +126,14 @@ function DocsifyNavLink({ isActive, href, title }: DocsifyNavLinkProps) {
 }
 
 interface DocsifyNavFrameProps {
+    hidden: boolean
     children?: DocsifyNavElement | DocsifyNavElement[]
 }
 
 type DocsifyNavFrameConstructor = (props: DocsifyNavFrameProps) => JSX.Element
 
-function DocsifyNavFrame({ children }: DocsifyNavFrameProps) {
-    return <ul>{children}</ul>
+function DocsifyNavFrame({ children, hidden }: DocsifyNavFrameProps) {
+    return <ul hidden={hidden}>{children}</ul>
 }
 
 interface DocsifyNavElement {
@@ -161,7 +162,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyContainerElement | undefined>()
     let [navBar, setNavBar] = useState<DocsifyNavElement | undefined>()
-    let [browerWidth,setBrowerWidth]=useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
+    let [browserWidth, setBrowserWidth] = useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
     let [close, SetClose] = useState(false)
     const hashId = useLocation()
 
@@ -259,7 +260,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
 
     //init nav part after artical changed and update link highlight
     useEffect(() => {
-        function getNavElement(content?: DocsifyContainerElement): DocsifyNavElement | undefined {
+        function getNavElement(floor: number, content?: DocsifyContainerElement): DocsifyNavElement | undefined {
+            if (floor > 5) return undefined
             if (content === undefined) {
                 return undefined
             } else {
@@ -270,7 +272,13 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                     props.children.forEach((i) => {
                         t = t as DocsifyNavElement[]
                         if (typeof i !== 'string') {
-                            let p = getNavElement(i)
+                            let p
+                            if (content.type === H1 || content.type === H2 || content.type === H3) {
+                                p = getNavElement(floor + 1, i)
+                            } else {
+                                p = getNavElement(floor, i)
+                            }
+
                             if (p !== undefined) {
                                 t.push(p)
                             }
@@ -284,7 +292,11 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                 } else if (typeof props.children === 'string') {
                     t = undefined
                 } else {
-                    t = getNavElement(props.children)
+                    if (content.type === H1 || content.type === H2 || content.type === H3) {
+                        t = getNavElement(floor + 1, props.children)
+                    } else {
+                        t = getNavElement(floor, props.children)
+                    }
                 }
 
                 switch (content.type) {
@@ -322,13 +334,13 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
                         //according to is having children return different components
                         if (t === undefined) {
                             return (
-                                <DocsifyNavLink isActive={isActive} key={keyCount++} href={_href} title={title} />
+                                <DocsifyNavLink isActive={isActive} key={keyCount++} href={_href} title={floor % 2 === 0 ? '- ' + title : title} />
                             )
                         } else {
                             return (
                                 <React.Fragment key={keyCount++}>
-                                    <DocsifyNavLink isActive={isActive} href={_href} title={title} />
-                                    <DocsifyNavFrame>{t}</DocsifyNavFrame>
+                                    <DocsifyNavLink isActive={isActive} href={_href} title={floor % 2 === 0 ? '- ' + title : title} />
+                                    <DocsifyNavFrame hidden={false}>{t}</DocsifyNavFrame>
                                 </React.Fragment>
                             )
                         }
@@ -350,7 +362,7 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             state[i].haveGotten = false
         })
 
-        setNavBar(getNavElement(children))
+        setNavBar(getNavElement(1, children))
     }, [artical, state])
 
 
@@ -376,8 +388,8 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
             }
         }
         if (navBar !== undefined) {
-            console.log('@@navBar=', navBar)
-            update(navBar)
+            // console.log('@@navBar=', navBar)
+            // update(navBar)
         }
     }, [state])
 
@@ -404,20 +416,20 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(hashId.hash)
     }, [hashId.hash])
-    
-    window.addEventListener('resize',function (){
+
+    window.addEventListener('resize', function () {
         let newBrowserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        if(newBrowserWidth-browerWidth>0){
-            if(newBrowserWidth>700&&browerWidth<700){
+        if (newBrowserWidth - browserWidth > 0) {
+            if (newBrowserWidth > 700 && browserWidth < 700) {
                 SetClose(false)
             }
-        }else{
-            if(newBrowserWidth<700&&browerWidth>=700){
+        } else {
+            if (newBrowserWidth < 700 && browserWidth >= 700) {
                 SetClose(true)
             }
         }
-        setBrowerWidth(newBrowserWidth)
-    })    
+        setBrowserWidth(newBrowserWidth)
+    })
 
     function handleClose() {
         SetClose(!close)

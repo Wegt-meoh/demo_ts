@@ -121,7 +121,7 @@ html {
 .Docsify-content-artical p {
     padding: 10px;
     border-radius: 4px;
-    width: 80%;
+    max-width: 80%;
     background-color: rgb(231, 232, 233);
 }
 
