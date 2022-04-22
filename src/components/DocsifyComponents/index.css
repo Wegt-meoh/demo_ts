@@ -26,6 +26,7 @@ html {
 
 .Docsify-sider {
     padding-top: 40px;
+    padding-bottom: 40px;
     position: fixed;
     top: 0;
     left: 0;
@@ -154,7 +155,7 @@ html {
 .Docsify-sider-toggle {
     z-index: 20;
     padding: 10px;
-    width: 300px;
+    width: 294px;
     background: none;
     border: none;
     outline: none;
