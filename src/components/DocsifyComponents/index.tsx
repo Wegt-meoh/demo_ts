@@ -161,12 +161,10 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
     let [state, setState] = useState<CheckHashHref>({})
     let [artical, setArtical] = useState<DocsifyContainerElement | undefined>()
     let [navBar, setNavBar] = useState<DocsifyNavElement | undefined>()
+    let [browerWidth,setBrowerWidth]=useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
     let [close, SetClose] = useState(false)
     const hashId = useLocation()
 
-    // 获取浏览器可视区域宽高（兼容性比较好，不包括工具栏和滚动条）
-    const browserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    const browserHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 
     //used for unique key to avoid warning
@@ -406,11 +404,20 @@ export function DocsifyContainer({ children }: DocsifyContainerProps) {
         // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(hashId.hash)
     }, [hashId.hash])
-
-    useEffect(()=>{
-        console.log('browser height',browserHeight)
-        console.log('browser width',browserWidth)
-    },[window.innerHeight])
+    
+    window.addEventListener('resize',function (){
+        let newBrowserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        if(newBrowserWidth-browerWidth>0){
+            if(newBrowserWidth>700&&browerWidth<700){
+                SetClose(false)
+            }
+        }else{
+            if(newBrowserWidth<700&&browerWidth>=700){
+                SetClose(true)
+            }
+        }
+        setBrowerWidth(newBrowserWidth)
+    })    
 
     function handleClose() {
         SetClose(!close)
