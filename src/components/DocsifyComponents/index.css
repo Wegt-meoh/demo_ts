@@ -33,7 +33,7 @@ html {
     text-align: start;
     width: 300px;
     overflow-y: auto;
-    transition:transform .25s ease-out;
+    transition: transform .25s ease-out;
     border-right: 1px solid rgba(0, 0, 0, .07);
     /* background-color: rgb(249, 253, 209); */
 }
@@ -61,24 +61,22 @@ html {
 }
 
 .Docsify-sider-nav {
-    z-index: 20;
     line-height: 2em;
-}
-
-.Docsify-sider-nav ul,
-.Docsify-sider-nav ul li {
-    list-style: none;
-}
-
-.Docsify-sider-nav ul li a {
     color: #505d6b;
+}
+
+.Docsify-sider-nav>ul li {
+    list-style: none;    
+}
+
+.Docsify-sider-nav li a {
+    color: inherit;
     font-size: 14px;
     font-weight: 400;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-bottom: none;
     display: block;
 }
 
@@ -103,12 +101,12 @@ html {
     left: 300px;
     bottom: 0;
     text-align: start;
-    transition:left .25s ease-out;
+    transition: left .25s ease-out;
     padding-top: 60px;
     /* background-color: turquoise; */
 }
 
-.Docsify-content-close{
+.Docsify-content-close {
     left: 0;
 }
 
@@ -168,7 +166,7 @@ html {
 }
 
 .Docsify-sider-toggle-close {
-    width: auto;    
+    width: auto;
 }
 
 .Docsify-sider-toggle>div>span {
