@@ -121,6 +121,7 @@ interface DocsifyContainerProps {
     children: React.ReactChild
     direction?: 'left' | 'right'
     navPosition?: 'left' | 'right'
+    subMaxLevel?: number
 }
 
 interface NavToggleButtonProps {
@@ -160,7 +161,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         minContentWidth = 800,
         children,
         direction = 'left',
-        navPosition = 'left'
+        navPosition = 'left',
+        subMaxLevel: maxShownNavChildren = 3
     } = props
 
 
@@ -185,7 +187,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
             //这里递归处理content.props.children
             const children = content.props.children
-            const kids = React.Children.map(children, (child) => {
+            const type = content.type
+            const kids = React.Children.map(children, child => {
                 if (React.isValidElement(child)) {
                     return getArticalElements(child)
                 } else {
@@ -194,13 +197,16 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             })
 
             //这里定义如何处理输入的组件
-            switch (content.type) {
+            switch (type) {
                 case Header:
+                    const size = content.props.size
+                    const title = content.props.title
+
                     return (
                         <DocsifyHeaderLink
-                            size={content.props.size}
+                            size={size}
                             register={registerLinkState}
-                            title={content.props.title}
+                            title={title}
                             children={kids} />
                     )
                 case Code:
@@ -210,8 +216,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
                 default:
                     return (
                         React.createElement(
-                            typeof children.type === 'string' ? children.type : 'div',
-                            {},
+                            type,
+                            undefined,
                             kids
                         )
                     )
@@ -221,24 +227,34 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         setArtical(getArticalElements(children))
     }, [])
 
-    //init nav part after artical changed and update link highlight
+    //init nav part after artical changed and update link 
     useEffect(() => {
-        function getNavElement(floor: number, content: React.ReactChild): React.ReactElement | null {
-            if (floor > 5) return null
-            if (typeof content === 'string' || typeof content === 'number') return null
+        function getNavElement(floor: number, content: React.ReactChild): [React.ReactElement | null, boolean] {
+            if (floor > maxShownNavChildren || floor > 6) return [null, false]
+            if (typeof content === 'string' || typeof content === 'number') return [null, false]
+
             const type = content.type
             const children = content.props.children
+            let shouldHidden: boolean = true
+
             const kids = React.Children.map(children, child => {
                 if (React.isValidElement(child) && child.type === Header) {
-                    return getNavElement(floor + 1, child)
+                    const [element, isActive] = getNavElement(floor + 1, child)
+                    shouldHidden = shouldHidden && !isActive
+                    return element
                 }
+                return undefined
             })
+
             switch (type) {
                 case Header:
-                    //according to title calculate the value of _href from state
+
+                    //according to title find the value of _href from state
                     const title = content.props.title
                     let isActive = false
-                    let _index = 1, _href = '#' + encodeURI(title)
+                    let _index = 1
+                    let _href = '#' + encodeURI(title)
+
                     if (state[_href] === undefined) {
                         _href = '#'
                     } else if (state[_href].haveGotten === false) {
@@ -260,36 +276,33 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
                             isActive = state[_href].isFoucus
                         }
                     }
+
                     //according to is having children return different components
                     if (kids === undefined || kids === null) {
                         return (
-                            <DocsifyNavLink
+                            [<DocsifyNavLink
                                 isActive={isActive}
                                 href={_href}
-                                title={floor % 2 === 0 ? '- ' + title : title} />
+                                title={floor % 2 === 0 ? '- ' + title : title} />, isActive || !shouldHidden]
                         )
                     } else {
                         return (
-                            <React.Fragment>
+                            [<>
                                 <DocsifyNavLink
                                     isActive={isActive}
                                     href={_href}
                                     title={floor % 2 === 0 ? '- ' + title : title}
                                 />
                                 <DocsifyNavFrame
-                                    hidden={false}
+                                    hidden={shouldHidden && !isActive}
                                     children={kids}
                                 />
-                            </React.Fragment>
+                            </>, isActive || !shouldHidden]
                         )
                     }
                 default:
                     return (
-                        React.createElement(
-                            typeof type === 'string' ? content.type : 'div',
-                            {},
-                            kids
-                        )
+                        [<>{kids}</>, !shouldHidden]
                     )
 
             }
@@ -299,7 +312,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             state[i].haveGotten = false
         })
 
-        setNavBar(getNavElement(1, children))
+        setNavBar(getNavElement(0, children)[0])
     }, [artical, state])
 
     //do not setState here
