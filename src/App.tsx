@@ -78,6 +78,11 @@ interface Box{
   name:unknown
 }
 
+type ff=((props:string)=>string)|((props:number)=>number)
+let f:ff=function (x:number):number{
+  return 43
+}
+
 let x:Box={name:'6767'}
 if(typeof x.name === 'string'){
   console.log('unknow type1',x.name.toLowerCase())
