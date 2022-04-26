@@ -1,5 +1,4 @@
-import React, { HtmlHTMLAttributes, useEffect, useState } from 'react'
-import { MouseEventHandler } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import './index.css'
 
@@ -46,7 +45,7 @@ interface DocsifyHeaderLinkProps extends HeaderProps {
 function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
 
     const {
-        size,
+        size='h1',
         title,
         children,
         register,
@@ -72,7 +71,7 @@ function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
     }, [])
     return (
         <>
-            <h1 id={headerId} className={sizeStyle[size || 'h1']}>
+            <h1 id={headerId} className={sizeStyle[size]}>
                 <a href={hrefHash}>
                     {title}
                 </a>
@@ -87,18 +86,27 @@ interface DocsifyNavLinkProps {
     isActive: boolean
     href: string  // 指向某一个锚点的地址
     title: string // 展示给用户的内容
+    style?: React.CSSProperties
+    level: number
 }
 
 function DocsifyNavLink(props: DocsifyNavLinkProps) {
     const {
         isActive,
         href,
-        title
+        title,
+        style,
+        level,
+        ...res
     } = props
 
+    let className = isActive ? 'Docsify-sider-nav-li-active' : ''
+    if (level === 1) className += ' boldFontWeight'
+    else className += ' normalFontWeight'
+
     return (
-        <li className={isActive ? 'Docsify-sider-nav-li-active' : ''}>
-            <a href={href}>{title}</a>
+        <li className={className} {...res}>
+            <a href={href} style={style}>{title}</a>
         </li>
     )
 }
@@ -124,10 +132,8 @@ interface DocsifyContainerProps {
     subMaxLevel?: number
 }
 
-interface NavToggleButtonProps {
-    onClick: MouseEventHandler<HTMLButtonElement>,
+interface NavToggleButtonProps extends React.ButtonHTMLAttributes<any> {
     close: boolean
-    style?: React.CSSProperties
 }
 
 function NavToggleButton(props: NavToggleButtonProps) {
@@ -215,9 +221,9 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
                     )
                 default:
                     return (
-                        React.createElement(
-                            type,
-                            undefined,
+                        React.cloneElement(
+                            content,
+                            content.props,
                             kids
                         )
                     )
@@ -229,8 +235,37 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
     //init nav part after artical changed and update link 
     useEffect(() => {
+        function findHrefByTitle(title: string, state: CheckHashHref): [string, boolean] {
+            let _index: number = 1
+            let isActive: boolean = false
+            let _href = '#' + encodeURI(title)
+
+            if (state[_href] === undefined) {
+                _href = '#'
+            } else if (state[_href].haveGotten === false) {
+                // console.log('@@state[_href] first meet')
+                state[_href].haveGotten = true
+                isActive = state[_href].isFoucus
+            } else {
+                //handle same href here
+                while (state[_href + '-' + _index] !== undefined && state[_href + '-' + _index].haveGotten === true) {
+                    _index++
+                }
+                if (state[_href + '-' + _index] === undefined) {
+                    // console.log('@@state[_href+-+_index]===undefined')
+                    _href = '#'
+                } else {
+                    // console.log('@@successful')
+                    _href = _href + '-' + _index
+                    state[_href].haveGotten = true
+                    isActive = state[_href].isFoucus
+                }
+            }
+            return [_href, isActive]
+        }
+
         function getNavElement(floor: number, content: React.ReactChild): [React.ReactElement | null, boolean] {
-            if (floor > maxShownNavChildren || floor > 6) return [null, false]
+            if (floor > maxShownNavChildren || floor > 5) return [null, false]
             if (typeof content === 'string' || typeof content === 'number') return [null, false]
 
             const type = content.type
@@ -251,55 +286,23 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
                     //according to title find the value of _href from state
                     const title = content.props.title
-                    let isActive = false
-                    let _index = 1
-                    let _href = '#' + encodeURI(title)
-
-                    if (state[_href] === undefined) {
-                        _href = '#'
-                    } else if (state[_href].haveGotten === false) {
-                        // console.log('@@state[_href] first meet')
-                        state[_href].haveGotten = true
-                        isActive = state[_href].isFoucus
-                    } else {
-                        //handle same href here
-                        while (state[_href + '-' + _index] !== undefined && state[_href + '-' + _index].haveGotten === true) {
-                            _index++
-                        }
-                        if (state[_href + '-' + _index] === undefined) {
-                            // console.log('@@state[_href+-+_index]===undefined')
-                            _href = '#'
-                        } else {
-                            // console.log('@@successful')
-                            _href = _href + '-' + _index
-                            state[_href].haveGotten = true
-                            isActive = state[_href].isFoucus
-                        }
-                    }
+                    let [_href, isActive] = findHrefByTitle(title, state)
 
                     //according to is having children return different components
-                    if (kids === undefined || kids === null) {
-                        return (
-                            [<DocsifyNavLink
+                    return (
+                        [<>
+                            <DocsifyNavLink
                                 isActive={isActive}
                                 href={_href}
-                                title={floor % 2 === 0 ? '- ' + title : title} />, isActive || !shouldHidden]
-                        )
-                    } else {
-                        return (
-                            [<>
-                                <DocsifyNavLink
-                                    isActive={isActive}
-                                    href={_href}
-                                    title={floor % 2 === 0 ? '- ' + title : title}
-                                />
-                                <DocsifyNavFrame
-                                    hidden={shouldHidden && !isActive}
-                                    children={kids}
-                                />
-                            </>, isActive || !shouldHidden]
-                        )
-                    }
+                                level={floor}
+                                title={floor % 2 === 0 ? '- ' + title : title}
+                            />
+                            {(kids === undefined || kids === null) || <DocsifyNavFrame
+                                hidden={shouldHidden && !isActive}
+                                children={kids}
+                            />}
+                        </>, isActive || !shouldHidden]
+                    )
                 default:
                     return (
                         [<>{kids}</>, !shouldHidden]
