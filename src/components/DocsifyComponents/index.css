@@ -1,4 +1,4 @@
-.boldFontColor {
+.darkFontColor {
     color: #34495e
 }
 
@@ -10,21 +10,30 @@
     color: #858585;
 }
 
+.normalFontWeight{
+    font-weight: 400;
+}
+
+.boldFontWeight{
+    font-weight: 700;
+}
+
 html {
     scroll-behavior: smooth;
 }
 
 .Docsify {
     --theme-color: #42b983;
+    --sider-width: 240px;
     font-size: 15px;
-    text-align: center;
+    text-align: start;
 }
 
 .Docsify-header {
     background-color: rgb(122, 186, 215);
 }
 
-.Docsify-sider {
+.Docsify-sider {    
     padding-top: 40px;
     padding-bottom: 40px;
     position: fixed;
@@ -32,7 +41,7 @@ html {
     left: 0;
     bottom: 0;
     text-align: start;
-    width: 300px;
+    width: var(--sider-width);
     overflow-y: auto;
     transition: transform .25s ease-out;
     border-right: 1px solid rgba(0, 0, 0, .07);
@@ -40,7 +49,7 @@ html {
 }
 
 .Docsify-sider-close {
-    transform: translateX(-300px);
+    transform: translateX(calc(-1*var(--sider-width)));
 }
 
 .Docsify-sider::-webkit-scrollbar {
@@ -67,13 +76,13 @@ html {
 }
 
 .Docsify-sider-nav>ul li {
-    list-style: none;    
+    list-style: none;
 }
 
 .Docsify-sider-nav li a {
     color: inherit;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: inherit;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -99,7 +108,7 @@ html {
     position: absolute;
     top: 0;
     right: 0;
-    left: 300px;
+    left: var(--sider-width);
     bottom: 0;
     text-align: start;
     transition: left .25s ease-out;
@@ -122,7 +131,7 @@ html {
     white-space: pre-wrap;
     padding: 10px;
     border-radius: 4px;
-    max-width: 80%;
+    max-width: 90%;
     background-color: rgb(231, 232, 233);
 }
 
