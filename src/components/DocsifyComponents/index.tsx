@@ -45,7 +45,7 @@ interface DocsifyHeaderLinkProps extends HeaderProps {
 function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
 
     const {
-        size='h1',
+        size = 'h1',
         title,
         children,
         register,
@@ -120,10 +120,6 @@ function DocsifyNavFrame({ children, hidden }: DocsifyNavFrameProps) {
     return <ul hidden={hidden}>{children}</ul>
 }
 
-interface CheckHashHref {
-    [index: string]: { isFoucus: boolean, haveGotten: boolean }
-}
-
 interface DocsifyContainerProps {
     minContentWidth?: number
     children: React.ReactChild
@@ -146,7 +142,7 @@ function NavToggleButton(props: NavToggleButtonProps) {
     return (
         <button
             onClick={onClick}
-            className={close ? 'Docsify-sider-toggle Docsify-sider-toggle-close' : 'Docsify-sider-toggle'}
+            className={'Docsify-sider-toggle ' + (close ? 'Docsify-sider-toggle-close' : '')}
             {...res}
         >
             <div>
@@ -157,6 +153,12 @@ function NavToggleButton(props: NavToggleButtonProps) {
         </button>
     )
 }
+
+interface CheckHashHref {
+    [index: string]: { isFoucus: boolean, haveGotten: boolean }
+}
+
+type hashOffsetType = Array<[number, string]>
 
 /**
  * notice its children should be H1, H2, H3, Code or <></> and other Component will be seemed as <div/>
@@ -179,6 +181,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     const [browserWidth, setBrowserWidth] = useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
     const [close, SetClose] = useState(false)
     const location = useLocation()
+    let hashOffset: hashOffsetType = []
 
 
 
@@ -328,20 +331,21 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         return false
     }
 
-    //处理导航栏link高亮，当地址栏的hash改变
-    useEffect(() => {
-        function linkHighlight(hash: string) {
-            if (state[hash] === undefined) return
-            let newState = { ...state }
-            for (let i in newState) {
-                if (i !== hash) {
-                    newState[i].isFoucus = false
-                } else {
-                    newState[i].isFoucus = true
-                }
+    function linkHighlight(hash: string) {
+        if (state[hash] === undefined) return
+        let newState = { ...state }
+        for (let i in newState) {
+            if (i !== hash) {
+                newState[i].isFoucus = false
+            } else {
+                newState[i].isFoucus = true
             }
-            setState({ ...newState })
         }
+        setState({ ...newState })
+    }
+
+    //处理导航栏link高亮，当地址栏的hash改变
+    useEffect(() => {        
         // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(location.hash)
     }, [location.hash])
@@ -358,10 +362,46 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             }
         }
         setBrowserWidth(newBrowserWidth)
+        updateHashOffset()
+    })
+
+    window.addEventListener('scroll', function (this) {
+        if (hashOffset.length === 0) {
+            updateHashOffset()
+        }
+        const offsetTop = this.scrollY
+        let currentHash='#'
+        for(let i=0;i<hashOffset.length;i++){
+            if(offsetTop>=hashOffset[i][0]) currentHash=hashOffset[i][1]
+            else break
+        }
+        console.log('currentHash=',currentHash)
+        linkHighlight(currentHash)
     })
 
     const handleClose = () => {
         SetClose(!close)
+    }
+
+    const updateHashOffset = () => {
+        hashOffset = []
+        Object.getOwnPropertyNames(state).forEach((hashHref) => {
+            const id = decodeURI(hashHref).slice(1)
+            const height: number | undefined = document.getElementById(id)?.offsetTop
+            if (height !== undefined) {
+                let index = -1
+                for (let i = 0; i < hashOffset.length; i++) {
+                    if (hashOffset[i][0] >= height) {
+                        index = i
+                        break
+                    }
+                }
+                
+                if (index === -1) hashOffset.push([height, hashHref])
+                else hashOffset.splice(index,0,[height,hashHref])
+            }
+        })
+        console.log('hashOffset=',hashOffset)
     }
 
     return (
@@ -369,13 +409,13 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             <NavToggleButton onClick={handleClose} close={close} />
 
             <div
-                className={close ? 'Docsify-sider Docsify-sider-close' : 'Docsify-sider'}>
+                className={'Docsify-sider ' + (close ? 'Docsify-sider-close' : '')}>
                 <div className='Docsify-sider-nav'>
                     <ul>{navBar}</ul>
                 </div>
             </div>
 
-            <div className={close ? 'Docsify-content Docsify-content-close' : 'Docsify-content'}>
+            <div className={'Docsify-content ' + (close ? 'Docsify-content-close' : '')}>
                 <div className="Docsify-content-artical">
                     {artical}
                 </div>
