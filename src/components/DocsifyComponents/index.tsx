@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+
+
+import deBouncing from '../../utils/deBoucing'
+import useResize from '../../utils/hooks/useResize'
+import useScroll from '../../utils/hooks/useScroll'
+import throtting from '../../utils/throtting'
 import './index.css'
+
+
 
 type HeaderSize = 'h1' | 'h2' | 'h3'
 
@@ -178,12 +186,89 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     const [state, setState] = useState<CheckHashHref>({})
     const [artical, setArtical] = useState<React.ReactChild>(<>loading...</>)
     const [navBar, setNavBar] = useState<React.ReactElement | null>(<>loading...</>)
-    const [browserWidth, setBrowserWidth] = useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
+    let [browserWidth] = useState(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
     const [close, SetClose] = useState(false)
     const location = useLocation()
     let hashOffset: hashOffsetType = []
 
 
+
+    //do not setState here
+    const registerLinkState = (linkHash: string) => {
+        if (state[linkHash] === undefined) {
+            let t = { isFoucus: false, haveGotten: false }
+            state[linkHash] = t
+            return true
+        }
+        return false
+    }
+
+    function linkHighlight(hash: string) {
+        if (state[hash] === undefined) return
+        let newState = { ...state }
+        for (let i in newState) {
+            if (i !== hash) {
+                newState[i].isFoucus = false
+            } else {
+                newState[i].isFoucus = true
+            }
+        }
+        setState({ ...newState })
+    }
+
+    const handleResize = () => {
+        let newBrowserWidth = window.innerWidth || window.document.documentElement.clientWidth || window.document.body.clientWidth;
+        console.log('handle resize', newBrowserWidth, browserWidth)
+        if (newBrowserWidth - browserWidth > 0) {
+            if (newBrowserWidth > minContentWidth && browserWidth < minContentWidth) {
+                SetClose(false)
+            }
+        } else {
+            if (newBrowserWidth < minContentWidth && browserWidth >= minContentWidth) {
+                SetClose(true)
+            }
+        }
+        browserWidth = newBrowserWidth
+    }
+
+    const handleScroll = () => {
+        // console.log('handle scroll')
+        if (hashOffset.length === 0) {
+            updateHashOffset()
+        }
+        const offsetTop = window.scrollY
+        let currentHash = '#'
+        for (let i = 0; i < hashOffset.length; i++) {
+            if (offsetTop >= hashOffset[i][0]) currentHash = hashOffset[i][1]
+            else break
+        }
+        linkHighlight(currentHash)
+    }
+
+    const handleClose = () => {
+        SetClose(!close)
+    }
+
+    const updateHashOffset = () => {
+        hashOffset = []
+        Object.getOwnPropertyNames(state).forEach((hashHref) => {
+            const id = decodeURI(hashHref).slice(1)
+            const height: number | undefined = document.getElementById(id)?.offsetTop
+            if (height !== undefined) {
+                let index = -1
+                for (let i = 0; i < hashOffset.length; i++) {
+                    if (hashOffset[i][0] >= height) {
+                        index = i
+                        break
+                    }
+                }
+
+                if (index === -1) hashOffset.push([height, hashHref])
+                else hashOffset.splice(index, 0, [height, hashHref])
+            }
+        })
+        // console.log('update hashOffset length =', hashOffset.length)
+    }
 
     //init artical part after did mount
     useEffect(() => {
@@ -321,88 +406,20 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         setNavBar(getNavElement(0, children)[0])
     }, [artical, state])
 
-    //do not setState here
-    const registerLinkState = (linkHash: string) => {
-        if (state[linkHash] === undefined) {
-            let t = { isFoucus: false, haveGotten: false }
-            state[linkHash] = t
-            return true
-        }
-        return false
-    }
-
-    function linkHighlight(hash: string) {
-        if (state[hash] === undefined) return
-        let newState = { ...state }
-        for (let i in newState) {
-            if (i !== hash) {
-                newState[i].isFoucus = false
-            } else {
-                newState[i].isFoucus = true
-            }
-        }
-        setState({ ...newState })
-    }
-
     //处理导航栏link高亮，当地址栏的hash改变
-    useEffect(() => {        
+    useEffect(() => {
         // console.log('@@link high light ', hashId.hash, state)
         linkHighlight(location.hash)
     }, [location.hash])
 
-    window.addEventListener('resize', function () {
-        let newBrowserWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        if (newBrowserWidth - browserWidth > 0) {
-            if (newBrowserWidth > minContentWidth && browserWidth < minContentWidth) {
-                SetClose(false)
-            }
-        } else {
-            if (newBrowserWidth < minContentWidth && browserWidth >= minContentWidth) {
-                SetClose(true)
-            }
-        }
-        setBrowserWidth(newBrowserWidth)
-        updateHashOffset()
-    })
+    //bug here
+    // useScroll(throtting(handleScroll, 300, 300))
 
-    window.addEventListener('scroll', function (this) {
-        if (hashOffset.length === 0) {
-            updateHashOffset()
-        }
-        const offsetTop = this.scrollY
-        let currentHash='#'
-        for(let i=0;i<hashOffset.length;i++){
-            if(offsetTop>=hashOffset[i][0]) currentHash=hashOffset[i][1]
-            else break
-        }
-        console.log('currentHash=',currentHash)
-        linkHighlight(currentHash)
-    })
+    useResize(deBouncing(updateHashOffset, 1000))
 
-    const handleClose = () => {
-        SetClose(!close)
-    }
+    useResize(handleResize)
 
-    const updateHashOffset = () => {
-        hashOffset = []
-        Object.getOwnPropertyNames(state).forEach((hashHref) => {
-            const id = decodeURI(hashHref).slice(1)
-            const height: number | undefined = document.getElementById(id)?.offsetTop
-            if (height !== undefined) {
-                let index = -1
-                for (let i = 0; i < hashOffset.length; i++) {
-                    if (hashOffset[i][0] >= height) {
-                        index = i
-                        break
-                    }
-                }
-                
-                if (index === -1) hashOffset.push([height, hashHref])
-                else hashOffset.splice(index,0,[height,hashHref])
-            }
-        })
-        console.log('hashOffset=',hashOffset)
-    }
+    console.log('@')
 
     return (
         <div className='Docsify'>
