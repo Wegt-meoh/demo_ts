@@ -22,11 +22,10 @@ html {
     scroll-behavior: smooth;
 }
 
-.Docsify {
+.Docsify{
     --theme-color: #42b983;
-    --sider-width: 240px;
+    --sider-width: 280px;
     font-size: 15px;
-    text-align: start;
 }
 
 .Docsify-header {
@@ -165,7 +164,7 @@ html {
 .Docsify-sider-toggle {
     z-index: 20;
     padding: 10px;
-    width: 294px;
+    width: calc(var(--sider-width) - 6px);
     background: none;
     border: none;
     outline: none;
