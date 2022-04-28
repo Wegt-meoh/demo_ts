@@ -60,7 +60,7 @@ function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
     } = props
 
     const [headerId, setHeaderId] = useState<string>(title)
-    const [hrefHash, setHrefHash] = useState<string>('#' + encodeURI(title))
+    const [hrefHash, setHrefHash] = useState<string>(encodeURI(title))
     const sizeStyle = { h3: 'Docsify-content-artical-h3', h2: 'Docsify-content-artical-h2', h1: 'Docsify-content-artical-h1' }
 
     // By default, effects run after every completed render,
@@ -71,10 +71,10 @@ function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
     useEffect(() => {
         if (register(hrefHash) !== true) {
             let index = 1
-            while (register(hrefHash + '-' + index) === false) index++
+            while (register(encodeURI(headerId + '-' + index)) === false) index++
             //then you need rerender the component
             setHeaderId(headerId + '-' + index)
-            setHrefHash(hrefHash + '-' + index)
+            setHrefHash('#?id='+encodeURI(headerId + '-' + index))
         }
     }, [])
     return (
@@ -94,6 +94,7 @@ interface DocsifyNavLinkProps {
     isActive: boolean
     href: string  // 指向某一个锚点的地址
     title: string // 展示给用户的内容
+    location:string
     style?: React.CSSProperties
     level: number
 }
@@ -105,16 +106,26 @@ function DocsifyNavLink(props: DocsifyNavLinkProps) {
         title,
         style,
         level,
+        location,
         ...res
-    } = props
+    } = props  
 
     let className = isActive ? 'Docsify-sider-nav-li-active' : ''
     if (level === 1) className += ' boldFontWeight'
     else className += ' normalFontWeight'
 
+    const targetId=decodeURI(href).slice(1)
+
+    function handleClick(){
+        document.getElementById(targetId)?.scrollIntoView({
+            behavior:'auto',
+            block:'start'
+        })
+    }
+
     return (
         <li className={className} {...res}>
-            <a href={href} style={style}>{title}</a>
+            <a href={'#?id='+targetId} style={style}>{title}</a>
         </li>
     )
 }
@@ -191,8 +202,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     const location = useLocation()
     let hashOffset: hashOffsetType = []
 
-
-
+    console.log(location)
+    
     //do not setState here
     const registerLinkState = (linkHash: string) => {
         if (state[linkHash] === undefined) {
@@ -203,22 +214,21 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         return false
     }
 
-    function linkHighlight(hash: string) {
-        if (state[hash] === undefined) return
+    function updateState(hash: string) {
+        const idParam=hash.split('?',1)[1].split('&')[0]
+        const idValue=idParam.split('=',1)[1]
+
+        if (state[idValue] === undefined || state[idValue].isFoucus === true) return
         let newState = { ...state }
-        for (let i in newState) {
-            if (i !== hash) {
-                newState[i].isFoucus = false
-            } else {
-                newState[i].isFoucus = true
-            }
-        }
-        setState({ ...newState })
+        Object.getOwnPropertyNames(newState).forEach((i)=>{
+            newState[i].isFoucus = false
+        })        
+        newState[idValue].isFoucus = true
+        setState(newState)
     }
 
     const handleResize = () => {
         let newBrowserWidth = window.innerWidth || window.document.documentElement.clientWidth || window.document.body.clientWidth;
-        console.log('handle resize', newBrowserWidth, browserWidth)
         if (newBrowserWidth - browserWidth > 0) {
             if (newBrowserWidth > minContentWidth && browserWidth < minContentWidth) {
                 SetClose(false)
@@ -242,7 +252,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             if (offsetTop >= hashOffset[i][0]) currentHash = hashOffset[i][1]
             else break
         }
-        linkHighlight(currentHash)
+        console.log(offsetTop,hashOffset)
+        updateState(currentHash)
     }
 
     const handleClose = () => {
@@ -253,8 +264,9 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         hashOffset = []
         Object.getOwnPropertyNames(state).forEach((hashHref) => {
             const id = decodeURI(hashHref).slice(1)
-            const height: number | undefined = document.getElementById(id)?.offsetTop
+            let height: number | undefined = document.getElementById(id)?.offsetTop                        
             if (height !== undefined) {
+                height+=60 // padding top value
                 let index = -1
                 for (let i = 0; i < hashOffset.length; i++) {
                     if (hashOffset[i][0] >= height) {
@@ -326,7 +338,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         function findHrefByTitle(title: string, state: CheckHashHref): [string, boolean] {
             let _index: number = 1
             let isActive: boolean = false
-            let _href = '#' + encodeURI(title)
+            let _href:string = encodeURI(title)
 
             if (state[_href] === undefined) {
                 _href = '#'
@@ -383,6 +395,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
                                 isActive={isActive}
                                 href={_href}
                                 level={floor}
+                                location={location.pathname}
                                 title={floor % 2 === 0 ? '- ' + title : title}
                             />
                             {(kids === undefined || kids === null) || <DocsifyNavFrame
@@ -409,15 +422,15 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     //处理导航栏link高亮，当地址栏的hash改变
     useEffect(() => {
         // console.log('@@link high light ', hashId.hash, state)
-        linkHighlight(location.hash)
+        updateState(location.hash)
     }, [location.hash])
 
-    //bug here
-    // useScroll(throtting(handleScroll, 300, 300))
+    // bug here
+    useScroll(window,throtting(handleScroll, 300, 400))
 
-    useResize(deBouncing(updateHashOffset, 1000))
+    useResize(window, deBouncing(updateHashOffset, 1000))
 
-    useResize(handleResize)
+    useResize(window, throtting(handleResize,400,300))
 
     console.log('@')
 
