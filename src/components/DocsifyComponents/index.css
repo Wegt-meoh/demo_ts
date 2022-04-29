@@ -24,7 +24,7 @@ html {
 
 .Docsify{
     --theme-color: #42b983;
-    --sider-width: 280px;
+    --sider-width: 300px;
     font-size: 15px;
 }
 
@@ -124,6 +124,10 @@ html {
     max-width: 80%;
     padding: 30px 15px 40px;
     position: relative;
+}
+
+.Docsify-content-artical img{
+    max-width: 100%;
 }
 
 .Docsify-content-artical p {
