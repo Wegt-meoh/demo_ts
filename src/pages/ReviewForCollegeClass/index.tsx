@@ -1,6 +1,8 @@
 import React from 'react'
 
-import { Code, DocsifyContainer, Header } from '../../components/DocsifyComponents'
+import { DocsifyContainer } from '../../components/DocsifyComponents'
+import Code from '../../components/DocsifyComponents/Code'
+import { Header } from '../../components/DocsifyComponents/Header'
 
 
 import './index.css'
@@ -8,12 +10,12 @@ import './index.css'
 export default function ReviewForCollegeClass() {
 
   return (
-    <DocsifyContainer minContentWidth={900} subMaxLevel={4}>
+    <DocsifyContainer minContentWidth={900} subMaxLevel={3}>
       <>
         <Header title='sdf'>
           sadf
           <a href='http://www.baidu.com'>baidu</a>
-          <img src="./images/001.png" width='400px' alt="loading..." />
+          <img style={{ display: 'block' }} src='/images/001.png' alt="loading..." />
         </Header>
         <Code>
           新的操作系统：&
@@ -27,7 +29,7 @@ export default function ReviewForCollegeClass() {
             <Header title='h3' size='h3'>
               <Header title='h4'>
                 <Header title='h5'>
-
+                  <img style={{ display: 'block' }} src='/images/001.png' alt="loading..." />
                 </Header>
               </Header>
               <Header title='这是一个很长的h4标签的这是一个很长的h4标签的这是一个很长的h4标签的这是一个很长的h4标签的'>
@@ -44,7 +46,7 @@ export default function ReviewForCollegeClass() {
               </Header>
               <Header title='h4'>
                 <Header title='h5'>
-
+                  <img style={{ display: 'block' }} src='/images/001.png' alt="loading..." />
                 </Header>
               </Header>
             </Header>
