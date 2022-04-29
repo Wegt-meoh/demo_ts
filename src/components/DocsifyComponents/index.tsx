@@ -6,178 +6,30 @@ import deBouncing from '../../utils/deBoucing'
 import useResize from '../../utils/hooks/useResize'
 import useScroll from '../../utils/hooks/useScroll'
 import throtting from '../../utils/throtting'
+import Code from './Code'
+import DocsifyHeaderLink from './DocsifyHeaderLink'
+import DocsifyNavFrame from './DocsifyNavFrame'
+import DocsifyNavLink from './DocsifyNavLink'
+import { Header } from './Header'
 import './index.css'
+import NavToggleButton from './NavToggleButton'
 
 
-
-type HeaderSize = 'h1' | 'h2' | 'h3'
-
-interface HeaderProps {
-    size?: HeaderSize
-    title: string
-    children?: React.ReactChild | null | React.ReactChild[]
-}
-
-export function Header(props: HeaderProps) {
-    return null
-}
-
-interface CodeProps {
-    children: string
-}
-
-export function Code({ children }: CodeProps) {
-    let res: string[] = []
-    //format code string here
-    if (children !== undefined) {
-        // console.log('1@', children)
-        children = children.replace(/&[ ]*/g, '\n')
-        // console.log('2@',res)       
-        // res=res.map((i)=>{
-        //     return i.replace(/-/g,'\u00A0')
-        // })
-        // console.log('3@',res)
-    }
-
-    return (
-        <p>
-            {children}
-        </p>
-    )
-}
-
-interface DocsifyHeaderLinkProps extends HeaderProps {
-    register: (x: string) => boolean
-}
-
-function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
-
-    const {
-        size = 'h1',
-        title,
-        children,
-        register,
-    } = props
-
-    const [headerId, setHeaderId] = useState<string>(title)
-    const [hrefHash, setHrefHash] = useState<string>(encodeURI(title))
-    const sizeStyle = { h3: 'Docsify-content-artical-h3', h2: 'Docsify-content-artical-h2', h1: 'Docsify-content-artical-h1' }
-
-    // By default, effects run after every completed render,
-    // but you can choose to fire them only when certain values have changed.
-    // If you want to run an effect and clean it up only once (on mount and unmount),
-    // you can pass an empty array ([]) as a second argument.
-    // register href here
-    useEffect(() => {
-        if (register(hrefHash) !== true) {
-            let index = 1
-            while (register(encodeURI(headerId + '-' + index)) === false) index++
-            //then you need rerender the component
-            setHeaderId(headerId + '-' + index)
-            setHrefHash('#?id='+encodeURI(headerId + '-' + index))
-        }
-    }, [])
-    return (
-        <>
-            <h1 id={headerId} className={sizeStyle[size]}>
-                <a href={hrefHash}>
-                    {title}
-                </a>
-            </h1>
-            {children}
-        </>
-    )
-}
-
-
-interface DocsifyNavLinkProps {
-    isActive: boolean
-    href: string  // 指向某一个锚点的地址
-    title: string // 展示给用户的内容
-    location:string
-    style?: React.CSSProperties
-    level: number
-}
-
-function DocsifyNavLink(props: DocsifyNavLinkProps) {
-    const {
-        isActive,
-        href,
-        title,
-        style,
-        level,
-        location,
-        ...res
-    } = props  
-
-    let className = isActive ? 'Docsify-sider-nav-li-active' : ''
-    if (level === 1) className += ' boldFontWeight'
-    else className += ' normalFontWeight'
-
-    const targetId=decodeURI(href).slice(1)
-
-    function handleClick(){
-        document.getElementById(targetId)?.scrollIntoView({
-            behavior:'auto',
-            block:'start'
-        })
-    }
-
-    return (
-        <li className={className} {...res}>
-            <a href={'#?id='+targetId} style={style}>{title}</a>
-        </li>
-    )
-}
-
-interface DocsifyNavFrameProps {
-    hidden: boolean
-    children: React.ReactElement | React.ReactElement[]
-}
-
-function DocsifyNavFrame({ children, hidden }: DocsifyNavFrameProps) {
-    return <ul hidden={hidden}>{children}</ul>
-}
-
-interface DocsifyContainerProps {
-    minContentWidth?: number
-    children: React.ReactChild
-    direction?: 'left' | 'right'
-    navPosition?: 'left' | 'right'
-    subMaxLevel?: number
-}
-
-interface NavToggleButtonProps extends React.ButtonHTMLAttributes<any> {
-    close: boolean
-}
-
-function NavToggleButton(props: NavToggleButtonProps) {
-    const {
-        onClick,
-        close,
-        ...res
-    } = props
-
-    return (
-        <button
-            onClick={onClick}
-            className={'Docsify-sider-toggle ' + (close ? 'Docsify-sider-toggle-close' : '')}
-            {...res}
-        >
-            <div>
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </button>
-    )
-}
 
 interface CheckHashHref {
     [index: string]: { isFoucus: boolean, haveGotten: boolean }
 }
 
 type hashOffsetType = Array<[number, string]>
+
+interface DocsifyContainerProps {
+    minContentWidth?: number
+    children: React.ReactChild
+    direction?: 'left' | 'right'
+    navPosition?: 'left' | 'right'
+    subMaxLevel?: 1|2|3|4
+    wrap?: boolean
+}
 
 /**
  * notice its children should be H1, H2, H3, Code or <></> and other Component will be seemed as <div/>
@@ -189,6 +41,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         children,
         direction = 'left',
         navPosition = 'left',
+        wrap = false,
         subMaxLevel: maxShownNavChildren = 3
     } = props
 
@@ -202,8 +55,8 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     const location = useLocation()
     let hashOffset: hashOffsetType = []
 
-    console.log(location)
-    
+
+
     //do not setState here
     const registerLinkState = (linkHash: string) => {
         if (state[linkHash] === undefined) {
@@ -214,17 +67,23 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         return false
     }
 
-    function updateState(hash: string) {
-        const idParam=hash.split('?',1)[1].split('&')[0]
-        const idValue=idParam.split('=',1)[1]
+    function updateStateByHashId(hashId: string) {
+        // console.log('f updateState: state=')
+        // console.log(state)
+        if (hashId.length === 0 || hashId.indexOf('?id=') === -1) return
+        const idValue = hashId.slice(hashId.indexOf('?id=') + 4).split('&', 1)[0]
 
         if (state[idValue] === undefined || state[idValue].isFoucus === true) return
         let newState = { ...state }
-        Object.getOwnPropertyNames(newState).forEach((i)=>{
+        Object.getOwnPropertyNames(newState).forEach((i) => {
             newState[i].isFoucus = false
-        })        
+        })
         newState[idValue].isFoucus = true
         setState(newState)
+        document.getElementById(decodeURI(idValue))?.scrollIntoView({
+            behavior: 'auto',
+            block: 'start'
+        })
     }
 
     const handleResize = () => {
@@ -242,18 +101,17 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     }
 
     const handleScroll = () => {
-        // console.log('handle scroll')
+        console.log('handle scroll')
         if (hashOffset.length === 0) {
             updateHashOffset()
         }
         const offsetTop = window.scrollY
-        let currentHash = '#'
+        let currentHash: string = '#'
         for (let i = 0; i < hashOffset.length; i++) {
             if (offsetTop >= hashOffset[i][0]) currentHash = hashOffset[i][1]
             else break
         }
-        console.log(offsetTop,hashOffset)
-        updateState(currentHash)
+        updateStateByHashId('?id=' + currentHash)
     }
 
     const handleClose = () => {
@@ -263,10 +121,10 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     const updateHashOffset = () => {
         hashOffset = []
         Object.getOwnPropertyNames(state).forEach((hashHref) => {
-            const id = decodeURI(hashHref).slice(1)
-            let height: number | undefined = document.getElementById(id)?.offsetTop                        
+            const id = decodeURI(hashHref)
+            let height: number | undefined = document.getElementById(id)?.offsetTop
             if (height !== undefined) {
-                height+=60 // padding top value
+                height += 60 // padding top value
                 let index = -1
                 for (let i = 0; i < hashOffset.length; i++) {
                     if (hashOffset[i][0] >= height) {
@@ -338,7 +196,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         function findHrefByTitle(title: string, state: CheckHashHref): [string, boolean] {
             let _index: number = 1
             let isActive: boolean = false
-            let _href:string = encodeURI(title)
+            let _href: string = encodeURI(title)
 
             if (state[_href] === undefined) {
                 _href = '#'
@@ -370,7 +228,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
             const type = content.type
             const children = content.props.children
-            let shouldHidden: boolean = true
+            let shouldHidden: boolean = wrap
 
             const kids = React.Children.map(children, child => {
                 if (React.isValidElement(child) && child.type === Header) {
@@ -396,7 +254,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
                                 href={_href}
                                 level={floor}
                                 location={location.pathname}
-                                title={floor % 2 === 0 ? '- ' + title : title}
+                                title={title}
                             />
                             {(kids === undefined || kids === null) || <DocsifyNavFrame
                                 hidden={shouldHidden && !isActive}
@@ -421,16 +279,15 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
     //处理导航栏link高亮，当地址栏的hash改变
     useEffect(() => {
-        // console.log('@@link high light ', hashId.hash, state)
-        updateState(location.hash)
+        updateStateByHashId(location.hash)
     }, [location.hash])
 
     // bug here
-    useScroll(window,throtting(handleScroll, 300, 400))
+    // useScroll(window, throtting(handleScroll, 300, 400))
 
     useResize(window, deBouncing(updateHashOffset, 1000))
 
-    useResize(window, throtting(handleResize,400,300))
+    useResize(window, throtting(handleResize, 400, 300))
 
     console.log('@')
 
