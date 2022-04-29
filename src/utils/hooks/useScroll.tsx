@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react"
 
 export default function useScroll(window: Window, func: (args?: any) => any): void {
-    const preWidth = useRef<number>(window.scrollY)
-
+    let flag=useRef<boolean>(true)    
     return useEffect(() => {
         window.addEventListener('scroll', func)
         return () => {
