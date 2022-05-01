@@ -1,4 +1,4 @@
-export default function throtting(func: (args?: any) => any, delay: number, maxWaitTime: number) {
+export default function throtting(func: (...args: any[]) => any, delay: number, maxWaitTime: number) {
     let timer: NodeJS.Timeout | null = null
     let startTime = Date.now()
     return function () {
@@ -6,7 +6,7 @@ export default function throtting(func: (args?: any) => any, delay: number, maxW
         const waitTime = Date.now() - startTime
         if (waitTime >= maxWaitTime) {
             func()
-            startTime += waitTime
+            startTime =Date.now()
         } else {
             timer = setTimeout(func, delay)
         }
