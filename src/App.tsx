@@ -6,6 +6,7 @@ import Index from './pages/Index';
 import RgbaToHex from './pages/rgba2hex';
 import ReviewForCollegeClass from './pages/ReviewForCollegeClass';
 import Know from './pages/know';
+import RefDemo from './pages/RefDemo';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path='/app/reviewForCollegeClass' element={<ReviewForCollegeClass />} />
         <Route path='/app/rgba2hex' element={<RgbaToHex />} />
         <Route path='/app/know' element={<Know />} />
+        <Route path='/app/ref' element={<RefDemo />} />
         <Route path='*' element={<NoMatchPage />} />
       </Routes>
     </div>
@@ -149,11 +151,11 @@ function a3() {
   })
 }
 
-const t = Promise.all([a1(), a2(), a3()]).then(result => {
-  console.log('promise all result', result)
-}).catch(reason => {
-  console.log('promise all error', reason)
-})
+// const t = Promise.all([a1(), a2(), a3()]).then(result => {
+//   console.log('promise all result', result)
+// }).catch(reason => {
+//   console.log('promise all error', reason)
+// })
 
 type StringNumberBoolean = [string, number, ...boolean[]]
 
