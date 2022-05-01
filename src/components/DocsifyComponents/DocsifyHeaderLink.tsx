@@ -15,7 +15,7 @@ export default function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
     } = props
 
     const [headerId, setHeaderId] = useState<string>(title)
-    const [hrefHash, setHrefHash] = useState<string>('#?id=' + encodeURI(title))
+    const [hrefHash, setHrefHash] = useState<string>('#/?id=' + encodeURI(title))
     const sizeStyle = { h3: 'Docsify-content-artical-h3', h2: 'Docsify-content-artical-h2', h1: 'Docsify-content-artical-h1' }
 
     // By default, effects run after every completed render,
@@ -24,12 +24,12 @@ export default function DocsifyHeaderLink(props: DocsifyHeaderLinkProps) {
     // you can pass an empty array ([]) as a second argument.
     // register href here
     useEffect(() => {
-        if (register(encodeURI(headerId)) === false) {
+        if (register(headerId) === false) {
             let index = 1
-            while (register(encodeURI(headerId + '-' + index)) === false) index++
+            while (register(headerId + '-' + index) === false) index++
             //then you need rerender the component
             setHeaderId(headerId + '-' + index)
-            setHrefHash('#?id=' + encodeURI(headerId + '-' + index))
+            setHrefHash('#/?id=' + encodeURI(headerId + '-' + index))
         }
     }, [])
     return (

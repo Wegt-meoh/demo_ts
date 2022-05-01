@@ -33,7 +33,7 @@ export default function DocsifyNavLink(props: DocsifyNavLinkProps) {
 
     return (
         <li className={className} {...res}>
-            <a href={'#?id=' + targetId} title={title} style={style}>{title}</a>
+            <a href={href} title={title} style={style}>{title}</a>
         </li>
     )
 }
