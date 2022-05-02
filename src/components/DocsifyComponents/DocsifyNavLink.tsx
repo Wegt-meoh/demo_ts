@@ -2,7 +2,6 @@ interface DocsifyNavLinkProps {
     isActive: boolean
     href: string  // 指向某一个锚点的地址
     title: string // 展示给用户的内容
-    location: string
     style?: React.CSSProperties
     level: number
 }
@@ -14,7 +13,6 @@ export default function DocsifyNavLink(props: DocsifyNavLinkProps) {
         title,
         style,
         level,
-        location,
         ...res
     } = props
 
