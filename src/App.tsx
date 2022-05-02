@@ -157,6 +157,23 @@ function a3() {
 //   console.log('promise all error', reason)
 // })
 
+// const func=async () => {
+//   let promise=new Promise((resolve,reject)=>{
+//     setTimeout(()=>{
+//       resolve('excute')
+//     },1000)
+//   }) 
+//   console.log(await promise)
+//   console.log(await 0)
+//   console.log(await Promise.resolve(1))
+//   console.log(await 2)
+//   console.log(await Promise.resolve(3))
+// }
+
+// func().then((result)=>{
+//   console.log(result)
+// })
+
 type StringNumberBoolean = [string, number, ...boolean[]]
 
 const stringnn: StringNumberBoolean = ['sdf', 234, true, false, true, false]
