@@ -51,17 +51,16 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
     const location = useLocation()
     const [headerState, setHeaderState] = useState<HeaderStateType>({})
-    const [articalPart] = useState<React.ReactChild>(getArticalElements(children))
+    const [articalPart, setArticalPart] = useState<React.ReactChild>()
     const [navBarPart, setNavBarPart] = useState<React.ReactElement | null>()
     const browserWidth = useRef(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth)
     const [navCloseState, setNavCloseState] = useState(false)
-    const navLinkGroup = useRef<Array<HTMLAnchorElement>>(null)
-    const headerIdOffsetArray = useRef<Array<[number, string]>>([]) //Record the offset top of each '<DocsifyHeaderLink/>'
+    const navLinkGroup = useRef<Array<HTMLAnchorElement>>(null)    
 
 
 
     //Do not setState here,header id is not encoded    
-    function registerHeaderId(headerId: string) {
+    function tryToRegisterHeaderId(headerId: string) {
         if (headerState[headerId] === undefined) {
             let t = { isFoucus: false, haveUsed: false }
             headerState[headerId] = t
@@ -130,206 +129,168 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
         return result
     }
 
-    function handleScroll() {
-        let { current } = headerIdOffsetArray
-        if (current.length === 0) {
-            updateHeaderOffsetTopArray()
-        }
-        const offsetTop = window.scrollY
-        let currentHash: string = '#'
-        for (let i = 0; i < current.length; i++) {
-            if (offsetTop >= current[i][0]) currentHash = current[i][1]
-            else break
-        }
-        const idValue = currentHash
-        if (headerState[idValue] === undefined || headerState[idValue].isFoucus === true) return
-        let newState = { ...headerState }
-        Object.getOwnPropertyNames(newState).forEach((i) => {
-            newState[i].isFoucus = false
-        })
-        newState[idValue].isFoucus = true
-        setHeaderState(newState)
-    }
-
     function switchNavCloseState() {
         setNavCloseState(!navCloseState)
     }
 
-    function updateHeaderOffsetTopArray() {
-        headerIdOffsetArray.current = []
-        Object.getOwnPropertyNames(headerState).forEach((headerId) => {
-            const headerElement = document.getElementById(headerId)
-            if (headerElement !== null) {
-                const parent = headerElement.parentElement
-                const paddingTop = parent === null ? 0 : parent.offsetTop
-                const headerOffsetTop = headerElement.offsetTop + paddingTop // padding top value
-                let index = -1
-                for (let i = 0; i < headerIdOffsetArray.current.length; i++) {
-                    if (headerIdOffsetArray.current[i][0] >= headerOffsetTop) {
-                        index = i
-                        break
-                    }
-                }
-
-                if (index === -1) headerIdOffsetArray.current.push([headerOffsetTop, headerId])
-                else headerIdOffsetArray.current.splice(index, 0, [headerOffsetTop, headerId])
-            }
-        })
-        headerIdOffsetArray.current = headerIdOffsetArray.current
-        console.log('f update headerIdOffsetArray length =', headerIdOffsetArray.current.length)
-    }
-
     function scrollToSpecificHeader(id: string) {
-        if (headerIdOffsetArray.current.length !== Object.getOwnPropertyNames(headerState).length) {
-            console.log('f scrollToSpecificHeader')
-            updateHeaderOffsetTopArray()
-        }
-
-        let targetOffsetY: number = 0
-        for (let i = 0; i < headerIdOffsetArray.current.length; i++) {
-            if (headerIdOffsetArray.current[i][1] === id) {
-                targetOffsetY = headerIdOffsetArray.current[i][0]
-                break
-            }
-        }
-        window.scrollTo(0, targetOffsetY)
+        console.log('f scrollToSpecificHeader')
+        const headerElement=document.getElementById(id)
+        if(headerElement!=null){            
+            const paddingTop = headerElement.parentElement?.offsetTop
+            const headerOffsetTop = headerElement.offsetTop + (paddingTop===undefined?0:paddingTop)
+            window.scrollTo(0, headerOffsetTop)
+        }else{
+            console.log('header element is null')
+        }        
     }
 
-    function getArticalElements(content: React.ReactChild): React.ReactChild {
-        if (typeof content === 'string' || typeof content === 'number') {
-            return content
+    function handleDuplicateHeaderId(title: string): string {
+        let headerId: string = title
+        if (tryToRegisterHeaderId(headerId) === false) {
+            let index = 1
+            while (tryToRegisterHeaderId(headerId + '-' + index) === false) index++
+            headerId = headerId + '-' + index
         }
-
-        //这里递归处理content.props.children
-        const children = content.props.children
-        const type = content.type
-        const kids = React.Children.map(children, child => {
-            if (React.isValidElement(child)) {
-                return getArticalElements(child)
-            } else {
-                return child
+        return headerId
+    }
+    
+    //init artical
+    useEffect(() => {
+        function getArticalElements(content: React.ReactChild): React.ReactChild {
+            if (typeof content === 'string' || typeof content === 'number') {
+                return content
             }
-        })
-
-        //这里定义如何处理输入的组件
-        switch (type) {
-            case Header:
-                const size = content.props.size
-                const title = content.props.title
-
-                return (
-                    <DocsifyHeaderLink
-                        size={size}
-                        register={registerHeaderId}
-                        title={title}
-                        children={kids} />
-                )
-            case Code:
-                return (
-                    <Code children={kids[0]} />
-                )
-            default:
-                return (
-                    React.cloneElement(
-                        content,
-                        content.props,
-                        kids
+    
+            //这里递归处理content.props.children
+            const { children } = content.props
+            const { type } = content
+            const kids = React.Children.map(children, child => {
+                if (React.isValidElement(child)) {
+                    return getArticalElements(child)
+                } else {
+                    return child
+                }
+            })
+    
+            //这里定义如何处理输入的组件
+            switch (type) {
+                case Header:
+                    const { size, title } = content.props
+                    const headerId = handleDuplicateHeaderId(title)
+                    const href = '#/?id=' + headerId
+    
+                    return (
+                        <DocsifyHeaderLink
+                            size={size}
+                            href={href}
+                            headerId={headerId}
+                            title={title}
+                            children={kids} />
                     )
-                )
-        }
-
-    }
-
-    function getHrefByTitleFromHeaderState(title: string): [string, boolean] {
-        let isActive: boolean = false
-        let headerId = title
-        let hrefHash: string = '#'
-
-        if (headerState[headerId] === undefined) {
-            hrefHash = '#'
-        } else if (headerState[headerId].haveUsed === false) {
-            // console.log('@@state[_href] first meet')
-            headerState[headerId].haveUsed = true
-            isActive = headerState[headerId].isFoucus
-            hrefHash = '#/?id=' + encodeURI(headerId)
-        } else {
-            //handle same href here
-            let _index: number = 1
-            while (headerState[headerId + '-' + _index] !== undefined && headerState[headerId + '-' + _index].haveUsed === true) {
-                _index++
+                case Code:
+                    return (
+                        <Code children={kids[0]} />
+                    )
+                default:
+                    return (
+                        React.cloneElement(
+                            content,
+                            content.props,
+                            kids
+                        )
+                    )
             }
-            if (headerState[headerId + '-' + _index] === undefined) {
-                // console.log('@@state[_href+-+_index]===undefined')
+    
+        }        
+        console.log('init artical then setAriticalPart')
+        setArticalPart(getArticalElements(children))
+    }, [])
+
+    //init or update nav part
+    useEffect(() => {
+        function getHrefByTitleFromHeaderState(title: string): [string, boolean] {
+            let isActive: boolean = false
+            let headerId: string = title
+            let hrefHash: string = '#'
+    
+            if (headerState[headerId] === undefined) {
                 hrefHash = '#'
-            } else {
-                // console.log('@@successful')
-                headerId=headerId+'-'+_index
-                hrefHash = '#?id=' + encodeURI(headerId)
+            } else if (headerState[headerId].haveUsed === false) {
+                // console.log('@@state[_href] first meet')
                 headerState[headerId].haveUsed = true
                 isActive = headerState[headerId].isFoucus
+                hrefHash = '#/?id=' + encodeURI(headerId)
+            } else {
+                //handle same href here
+                let _index: number = 1
+                while (headerState[headerId + '-' + _index] !== undefined && headerState[headerId + '-' + _index].haveUsed === true) {
+                    _index++
+                }
+                if (headerState[headerId + '-' + _index] === undefined) {
+                    // console.log('@@state[_href+-+_index]===undefined')
+                    hrefHash = '#'
+                } else {
+                    // console.log('@@successful')
+                    headerId = headerId + '-' + _index
+                    hrefHash = '#?id=' + encodeURI(headerId)
+                    headerState[headerId].haveUsed = true
+                    isActive = headerState[headerId].isFoucus
+                }
+            }
+            return [hrefHash, isActive]
+        }
+        function getNavElement(floor: number, content: React.ReactChild): [React.ReactElement | null, boolean] {
+            if (floor > maxShownNavChildren || floor > 5) return [null, false]
+            if (typeof content === 'string' || typeof content === 'number') return [null, false]
+    
+            const { type } = content
+            const { children } = content.props
+            let shouldHidden: boolean = wrap
+    
+            const kids = React.Children.map(children, child => {
+                if (React.isValidElement(child) && child.type === Header) {
+                    const [element, isActive] = getNavElement(floor + 1, child)
+                    shouldHidden = shouldHidden && !isActive
+                    return element
+                }
+                return undefined
+            })
+    
+            switch (type) {
+                case Header:
+                    //according to title find the value of _href from state
+                    const { title } = content.props
+                    let [hrefHash, isActive] = getHrefByTitleFromHeaderState(title)
+    
+                    //according to is having children return different components
+                    return (
+                        [<>
+                            <DocsifyNavLink
+                                isActive={isActive}
+                                href={hrefHash}
+                                level={floor}
+                                title={title}
+                            />
+                            {(kids === undefined || kids === null) || <DocsifyNavFrame
+                                hidden={shouldHidden && !isActive}
+                                children={kids}
+                            />}
+                        </>, isActive || !shouldHidden]
+                    )
+                default:
+                    return (
+                        [<>{kids}</>, !shouldHidden]
+                    )
+    
             }
         }
-        return [hrefHash, isActive]
-    }
-
-    function getNavElement(floor: number, content: React.ReactChild): [React.ReactElement | null, boolean] {
-        if (floor > maxShownNavChildren || floor > 5) return [null, false]
-        if (typeof content === 'string' || typeof content === 'number') return [null, false]
-
-        const type = content.type
-        const children = content.props.children
-        let shouldHidden: boolean = wrap
-
-        const kids = React.Children.map(children, child => {
-            if (React.isValidElement(child) && child.type === Header) {
-                const [element, isActive] = getNavElement(floor + 1, child)
-                shouldHidden = shouldHidden && !isActive
-                return element
-            }
-            return undefined
-        })
-
-        switch (type) {
-            case Header:
-
-                //according to title find the value of _href from state
-                const title = content.props.title
-                let [hrefHash, isActive] = getHrefByTitleFromHeaderState(title)
-
-                //according to is having children return different components
-                return (
-                    [<>
-                        <DocsifyNavLink
-                            isActive={isActive}
-                            href={hrefHash}
-                            level={floor}
-                            location={location.pathname}
-                            title={title}
-                        />
-                        {(kids === undefined || kids === null) || <DocsifyNavFrame
-                            hidden={shouldHidden && !isActive}
-                            children={kids}
-                        />}
-                    </>, isActive || !shouldHidden]
-                )
-            default:
-                return (
-                    [<>{kids}</>, !shouldHidden]
-                )
-
-        }
-    }
-
-    //init nav part after artical changed and update link 
-    useEffect(() => {
+        console.log('init or update nav part')
         Object.getOwnPropertyNames(headerState).forEach((i) => {
             headerState[i].haveUsed = false
         })
-
-        console.log('useEffect[headerState]')
-
         setNavBarPart(getNavElement(0, children)[0])
-    }, [])
+    }, [headerState])
 
     /*
     Note: link highlighting in the navigation bar is not handled here, 
@@ -337,16 +298,13 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     Using useLayoutEffect instead of useEffect,
     because it need to be fired after all DOM mutations.(document.getElementById is used internally)
     */
-    useLayoutEffect(() => {
+    useEffect(() => {
+        console.log('scrollToSpecificHeader layout effect[location]')
         const hashParamPair = getHashParamPair(location.hash)
-        const idValue: string | undefined = hashParamPair['id']
+        const idValue: string | undefined = hashParamPair.id
 
-        if (idValue === undefined || headerState[idValue] === undefined || headerState[idValue].isFoucus === true) return
-
-        console.log('f useEffect[location]')
-        console.log(headerIdOffsetArray.current.length)
-        scrollToSpecificHeader(idValue)
-    })
+        scrollToSpecificHeader(idValue)        
+    },[location])
 
     // issue here
     // useScroll(window, throtting(handleScroll, 200, 100))
@@ -360,7 +318,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     return (
         <div className='Docsify'>
             <NavToggleButton onClick={switchNavCloseState} close={navCloseState} />
-            {console.log('@@')}
+
             <div
                 className={'Docsify-sider ' + (navCloseState ? 'Docsify-sider-close' : '')}>
                 <div className='Docsify-sider-nav'>
