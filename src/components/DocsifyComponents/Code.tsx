@@ -1,8 +1,11 @@
+import { CSSProperties } from "react"
+
 interface CodeProps {
     children: string
+    style?:CSSProperties
 }
 
-export default function Code({ children }: CodeProps) {
+export default function Code({ children ,style}: CodeProps) {
     let res: string[] = []
     //format code string here
     if (children !== undefined) {
@@ -16,7 +19,7 @@ export default function Code({ children }: CodeProps) {
     }
 
     return (
-        <p>
+        <p style={style}>
             {children}
         </p>
     )
