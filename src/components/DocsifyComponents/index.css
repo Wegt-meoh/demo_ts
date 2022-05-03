@@ -10,11 +10,11 @@
     color: #858585;
 }
 
-.normalFontWeight{
+.normalFontWeight {
     font-weight: 400;
 }
 
-.boldFontWeight{
+.boldFontWeight {
     font-weight: 700;
 }
 
@@ -22,7 +22,7 @@ html {
     scroll-behavior: smooth;
 }
 
-.Docsify{
+.Docsify {
     --theme-color: #42b983;
     --sider-width: 300px;
     font-size: 15px;
@@ -32,7 +32,7 @@ html {
     background-color: rgb(122, 186, 215);
 }
 
-.Docsify-sider {    
+.Docsify-sider {
     padding-top: 40px;
     padding-bottom: 40px;
     position: fixed;
@@ -116,7 +116,7 @@ html {
 }
 
 .Docsify-content-close {
-    left: 0;
+    left: 60px;
 }
 
 .Docsify-content-artical {
@@ -126,7 +126,13 @@ html {
     position: relative;
 }
 
-.Docsify-content-artical img{
+.Docsify-content-artical hr {
+    border: none;
+    height: 2px;
+    background-color: #d9d2d2;
+}
+
+.Docsify-content-artical img {
     max-width: 100%;
 }
 
@@ -138,12 +144,16 @@ html {
     background-color: rgb(231, 232, 233);
 }
 
-.Docsify-content-artical a {
-    color: #34495e;
+.Docsify-content-artical h1>a {
+    color: #505d6b;
+}
+
+.Docsify-content-artical h1>a:hover {
+    text-decoration: underline var(--theme-color);
 }
 
 .Docsify-content-artical a:hover {
-    text-decoration: underline var(--theme-color);
+    text-decoration: underline;
 }
 
 .Docsify-content-artical-h3 {

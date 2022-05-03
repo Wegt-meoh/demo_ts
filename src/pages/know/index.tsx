@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const data: Array<string> = ['sdf', 'sd', 'ttt', 'ff', 'fff']
@@ -70,16 +70,28 @@ export default function Know() {
             state[i].offsetTop = top === undefined ? Infinity : top
         }
         window.addEventListener('scroll', handleScroll)
-        
+
         // window.addEventListener('scroll',throtting(handleScroll,500,1000))
         return () => {
             window.removeEventListener('scroll', handleScroll)
         }
     }, [])
 
-    const handleClick=()=>{
+    const remover=useMemo(()=>{
+        function logOut(){
+            console.log('1')
+        }
+        console.log('add listener')
+        window.addEventListener('scroll',logOut)
+        return ()=>{
+            console.log('remove listener')
+            window.removeEventListener('scroll',logOut)
+        }
+    },[])
+
+    const handleClick = () => {
         console.log('handle click')
-        window.removeEventListener('scroll', handleScroll)
+        remover()
     }
 
     return (
