@@ -1,11 +1,7 @@
-import { configConsumerProps } from 'antd/lib/config-provider'
-import { resolve } from 'node:path/win32'
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 
 
-import deBouncing from '../../utils/deBoucing'
 import getHashParamPair from '../../utils/getHashParamPair'
 import useResize from '../../utils/hooks/useResize'
 import useScroll from '../../utils/hooks/useScroll'
@@ -22,9 +18,9 @@ import NavToggleButton from './NavToggleButton'
 const customScrollTime = 1000
 
 interface HeaderStateType {
+    title: string
     headerId: string,
     isFoucus: boolean,
-    haveUsed: boolean,
     headerSubLevel: number
 }
 
@@ -43,7 +39,7 @@ interface DocsifyContainerProps {
  */
 export function DocsifyContainer(props: DocsifyContainerProps) {
     const {
-        minContentWidth = 800,
+        minContentWidth = 900,
         children,
         direction = 'left',
         navPosition = 'left',
@@ -74,12 +70,17 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     }
 
     //Do not setState here,header id is not encoded    
-    function tryToRegisterHeaderId(headerId: string, headerSubLevel: number): boolean {
+    function tryToRegisterHeaderId(title: string, headerId: string, headerSubLevel: number): boolean {
         const isExist = getHeaderStateIndexByHeaderId(headerId)
         if (isExist !== -1) {
             return false
         } else {
-            headerStateArray.push({ headerId: headerId, isFoucus: false, haveUsed: false, headerSubLevel: headerSubLevel })
+            headerStateArray.push({
+                title: title,
+                headerId: headerId,
+                isFoucus: false,
+                headerSubLevel: headerSubLevel
+            })
             return true
         }
     }
@@ -91,24 +92,24 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
     function handleDuplicateHeaderId(title: string, headerSubLevel: number): string {
         let headerId: string = title
-        if (tryToRegisterHeaderId(headerId, headerSubLevel) === false) {
+        if (tryToRegisterHeaderId(title, headerId, headerSubLevel) === false) {
             let index: number = 1
             do {
                 headerId = title + '-' + index
                 index++
-            } while (tryToRegisterHeaderId(headerId, headerSubLevel) === false)
+            } while (tryToRegisterHeaderId(title, headerId, headerSubLevel) === false)
         }
         return headerId
     }
 
-    function smoothScrollY(window: Window, begin: number, end: number, during: number) {
-        const times: number = 10
+    function smoothScrollTo(begin: number, end: number, during: number) {
+        const framesPerSecond = 10
+        const times: number = framesPerSecond * during / 1000
         const step: number = (end - begin) / times
         let counter: number = 0
         const interval = during / times
         const timerOut = () => {
             setTimeout(() => {
-                console.log('time out excute')
                 counter++
                 window.scrollTo(0, begin + counter * step)
                 if (counter <= times) {
@@ -159,16 +160,11 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
     function handleScroll() {
         if (needHandleScroll.current === false) return
         if (currentHignlightHeaderStateIndex.current === null) currentHignlightHeaderStateIndex.current = 0
-        console.log('f handleScroll')
+
         const windowOffsetTop = window.scrollY
         const currentHighLightHeaderOffsetTop = getSpecificHeaderOffsetTop(headerStateArray[currentHignlightHeaderStateIndex.current].headerId)
-        console.log('windowOffsetTop')
-        console.log(windowOffsetTop)
-        console.log('currentHighLightHeaderOffsetTop')
-        console.log(currentHighLightHeaderOffsetTop)
-        console.log('currentHignlightHeaderStateIndex')
-        console.log(currentHignlightHeaderStateIndex.current)
         if (currentHighLightHeaderOffsetTop === null) return
+
         if (windowOffsetTop < currentHighLightHeaderOffsetTop) {
             for (let i = currentHignlightHeaderStateIndex.current - 1; i >= 0; i--) {
                 const offsetTop = getSpecificHeaderOffsetTop(headerStateArray[i].headerId)
@@ -265,118 +261,47 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             }
 
         }
-        console.log('init artical then setAriticalPart')
+
         setArticalPart(getArticalElements(children, 1))
     }, [])
 
     //init or update nav part
     useEffect(() => {
-        function getHrefByTitleFromHeaderState(title: string): [string, boolean] {
-            let isActive: boolean = false
-            let headerId: string = title
-            let hrefHash: string = '#'
-            const headerStateIndex = getHeaderStateIndexByHeaderId(headerId)
+        let headerStateArrayIndex: number = 0
 
-            if (headerStateIndex === -1) {
-                hrefHash = '#'
-            } else if (headerStateArray[headerStateIndex].haveUsed === false) {
-                // console.log('@@state[_href] first meet')
-                headerStateArray[headerStateIndex].haveUsed = true
-                isActive = headerStateArray[headerStateIndex].isFoucus
-                hrefHash = '#/?id=' + encodeURI(headerId)
-            } else {
-                //handle same href here
-                let _index: number = 1
-                let newHeaderId: string
-                let newHeaderStateIndex: number
-                do {
-                    newHeaderId = headerId + '-' + _index
-                    newHeaderStateIndex = getHeaderStateIndexByHeaderId(newHeaderId)
-                    _index++
-                } while (newHeaderStateIndex !== -1 && headerStateArray[newHeaderStateIndex].haveUsed === true)
+        function getNavPartByHeaderStateArray(): React.ReactElement[] | null {
+            if (headerStateArrayIndex >= headerStateArray.length) return null
 
-                if (headerStateArray[newHeaderStateIndex] === undefined) {
-                    // console.log('@@state[_href+-+_index]===undefined')
-                    hrefHash = '#'
-                } else {
-                    // console.log('@@successful')
-                    hrefHash = '#?id=' + encodeURI(newHeaderId)
-                    headerStateArray[newHeaderStateIndex].haveUsed = true
-                    isActive = headerStateArray[newHeaderStateIndex].isFoucus
+            const currentHeaderLevel = headerStateArray[headerStateArrayIndex].headerSubLevel
+            let sameLevelNavGroup = []
+
+            do {
+                const nextHeaderState = headerStateArray[headerStateArrayIndex]
+
+                if (nextHeaderState.headerSubLevel === currentHeaderLevel) {
+                    sameLevelNavGroup.push(
+                        <DocsifyNavLink
+                            isActive={headerStateArray[headerStateArrayIndex].isFoucus}
+                            href={'#/?id=' + headerStateArray[headerStateArrayIndex].headerId}
+                            title={headerStateArray[headerStateArrayIndex].title}
+                            fontBold={false}
+                        />
+                    )
+                    headerStateArrayIndex++
+                } else if (nextHeaderState.headerSubLevel > currentHeaderLevel) {
+                    sameLevelNavGroup.push(
+                        <DocsifyNavFrame hidden={false} children={getNavPartByHeaderStateArray()} />
+                    )
                 }
-            }
-            return [hrefHash, isActive]
-        }
-        function getNavElement(subNavLinkLevel: number, content: React.ReactChild): [React.ReactElement | null, boolean] {
-            // if (floor > maxShownNavChildren || floor > 5) return [null, false]
-            if (typeof content === 'string' || typeof content === 'number') return [null, false]
+            } while (headerStateArrayIndex < headerStateArray.length && headerStateArray[headerStateArrayIndex].headerSubLevel >= currentHeaderLevel)
 
-            const { type } = content
-            const { children } = content.props
-            let shouldHidden: boolean = wrap
-
-            switch (type) {
-                case Header:
-                    //according to title find the value of _href from state
-                    const { title } = content.props
-                    let [hrefHash, isActive] = getHrefByTitleFromHeaderState(title)
-
-                    const headerKids = React.Children.map(children, child => {
-                        if (React.isValidElement(child) && child.type === Header) {
-                            const [element, isActive] = getNavElement(subNavLinkLevel + 1, child)
-                            shouldHidden = shouldHidden && !isActive
-                            return element
-                        }
-                        return undefined
-                    })
-
-                    //according to is having children return different components
-                    return (
-                        [<>
-                            <DocsifyNavLink
-                                isActive={isActive}
-                                href={hrefHash}
-                                level={subNavLinkLevel}
-                                title={title}
-                            />
-                            {(headerKids === undefined || headerKids === null) || <DocsifyNavFrame
-                                hidden={shouldHidden && !isActive}
-                                children={headerKids}
-                            />}
-                        </>, isActive || !shouldHidden]
-                    )
-                default:
-                    const kids = React.Children.map(children, child => {
-                        if (React.isValidElement(child) && child.type === Header) {
-                            const [element, isActive] = getNavElement(subNavLinkLevel + 1, child)
-                            shouldHidden = shouldHidden && !isActive
-                            return element
-                        }
-                        return undefined
-                    })
-
-                    return (
-                        [<>{kids}</>, !shouldHidden]
-                    )
-
-            }
-        }
-        console.log('init or update nav part')
-        for (let i = 0; i < headerStateArray.length; i++) {
-            headerStateArray[i].haveUsed = false
+            return React.Children.map(sameLevelNavGroup, i => i)
         }
 
-        setNavBarPart(getNavElement(0, children)[0])
-    }, [articalPart, headerStateArray])
+        setNavBarPart(<DocsifyNavFrame hidden={false} children={getNavPartByHeaderStateArray()} />)
+    }, [headerStateArray])
 
-    /*
-    Note: link highlighting in the navigation bar is not handled here, 
-    but only scrolling to the corresponding position. When the hash in the address bar changes.
-    Using useLayoutEffect instead of useEffect,
-    because it need to be fired after all DOM mutations.(document.getElementById is used internally)
-    */
     useEffect(() => {
-        console.log('scrollToSpecificHeader effect[location]')
         const hashParamPair = getHashParamPair(location.hash)
         const headerId: string | undefined = hashParamPair.id
 
@@ -394,7 +319,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
 
     useScroll(throtting(handleScroll, 200, 100))
 
-    // useResize(window, throtting(handleResize, 400, 300))
+    useResize(throtting(handleResize, 800, 400))
 
     console.log('@')
 
@@ -405,7 +330,7 @@ export function DocsifyContainer(props: DocsifyContainerProps) {
             <div
                 className={'Docsify-sider ' + (navCloseState ? 'Docsify-sider-close' : '')}>
                 <div className='Docsify-sider-nav'>
-                    <ul>{navBarPart}</ul>
+                    {navBarPart}
                 </div>
             </div>
 
