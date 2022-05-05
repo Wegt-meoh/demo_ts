@@ -1,5 +1,4 @@
 function scrollToSpecificHeader(headerId: string) {
-    console.log('f scrollToSpecificHeader')
     const tagetOffsetTop=getSpecificHeaderOffsetTop(headerId)
     if(tagetOffsetTop!==null){
         window.scrollTo(0,tagetOffsetTop)

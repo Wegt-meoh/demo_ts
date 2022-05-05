@@ -146,13 +146,15 @@ html {
 
 .Docsify-content-artical h1>a {
     color: #505d6b;
+    text-decoration: none;
 }
 
 .Docsify-content-artical h1>a:hover {
     text-decoration: underline var(--theme-color);
 }
 
-.Docsify-content-artical a:hover {
+.Docsify-content-artical a{
+    color:var(--theme-color);
     text-decoration: underline;
 }
 
