@@ -3,7 +3,7 @@ interface DocsifyNavLinkProps {
     href: string  // 指向某一个锚点的地址
     title: string // 展示给用户的内容
     style?: React.CSSProperties
-    level: number
+    fontBold: boolean
 }
 
 export default function DocsifyNavLink(props: DocsifyNavLinkProps) {
@@ -12,13 +12,15 @@ export default function DocsifyNavLink(props: DocsifyNavLinkProps) {
         href,
         title,
         style,
-        level,
+        fontBold,
         ...res
     } = props
 
-    let className = isActive ? 'Docsify-sider-nav-li-active' : ''
-    if (level === 1) className += ' boldFontWeight'
-    else className += ' normalFontWeight'
+    const classNameArray: Array<string> = []
+
+    if (isActive) classNameArray.push('Docsify-sider-nav-li-active')
+    if (fontBold || isActive) classNameArray.push('boldFontWeight')
+    else classNameArray.push('normalFontWeight')
 
     const targetId = href
 
@@ -30,7 +32,7 @@ export default function DocsifyNavLink(props: DocsifyNavLinkProps) {
     }
 
     return (
-        <li className={className} {...res}>
+        <li className={classNameArray.join(' ')} {...res}>
             <a href={href} title={title} style={style}>{title}</a>
         </li>
     )
